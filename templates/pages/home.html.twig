@@ -1,0 +1,167 @@
+{% extends "base.html.twig" %}
+
+{% block title %}To Do List - Accueil
+{% endblock %}
+
+{% block body %}
+	<style>
+		.main-section {
+			display: flex;
+			height: 100vh;
+			background-color: #1a1a1a;
+			color: #fff;
+			font-family: 'Poppins', sans-serif;
+			flex-wrap: wrap;
+		}
+
+		.left-side {
+			flex: 1;
+			background: url('/images/2024-12-13-72f878a2-a5e2-4891-b30e-e599efedfda1.avif') no-repeat center center;
+			background-size: cover;
+			min-height: 300px;
+			background-position: center top;
+		}
+
+		.right-side {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: flex-start;
+			padding: 40px;
+		}
+
+		.right-side h1 {
+			font-size: 4rem;
+			max-width: 90%;
+			color: white;
+			margin: 0;
+			text-transform: uppercase;
+			line-height: 1.2;
+		}
+
+		.right-side p {
+			font-size: 1rem;
+			margin: 20px 0 30px;
+			line-height: 1.8;
+		}
+
+		.buttons {
+			display: flex;
+			gap: 20px;
+		}
+
+		.btn {
+			text-decoration: none;
+			color: #fff;
+			padding: 12px 24px;
+			border: 2px solid #fff;
+			border-radius: 30px;
+			transition: all 0.3s ease;
+			font-weight: 500;
+		}
+
+		.btn:hover {
+			background-color: #fff;
+			color: #1a1a1a;
+			transform: translateY(-2px);
+		}
+
+		#typed-text {
+			font-size: 4rem;
+			max-width: 90%;
+			color: #fff;
+			white-space: pre-wrap;
+			overflow: hidden;
+		}
+
+		@media(max-width: 1200px) {
+			.right-side h1,
+			#typed-text {
+				font-size: 3rem;
+			}
+		}
+
+		@media(max-width: 992px) {
+			.main-section {
+				flex-direction: column;
+			}
+
+			.left-side {
+				background-position: center center;
+				min-height: 200px;
+			}
+
+			.right-side {
+				padding: 30px;
+				text-align: center;
+				align-items: center;
+			}
+
+			.right-side h1,
+			#typed-text {
+				font-size: 2.5rem;
+			}
+
+			.right-side p {
+				font-size: 1.1rem;
+				margin: 20px 0 25px;
+			}
+
+			.buttons {
+				justify-content: center;
+			}
+
+			.btn {
+				width: 80%;
+				max-width: 250px;
+			}
+		}
+
+		@media(max-width: 768px) {
+			.right-side h1,
+			#typed-text {
+				font-size: 2rem;
+			}
+
+			.right-side p {
+				font-size: 1rem;
+				margin: 15px 0 20px;
+			}
+
+			.btn {
+				width: 100%;
+				max-width: 200px;
+				padding: 8px 16px;
+			}
+		}
+	</style>
+
+	<div class="main-section">
+		<div class="left-side"></div>
+
+		<div class="right-side">
+			<h1 id="typed-text"></h1>
+			<p>Gérer vos tâches et projets facilement !</p>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const text = "Bienvenue sur le gestionnaire de tâche";
+const element = document.getElementById('typed-text');
+let index = 0;
+
+function AfficheTitre() {
+if (index < text.length) {
+element.textContent += text.charAt(index);
+index++;
+setTimeout(AfficheTitre, 100);
+}
+}
+
+AfficheTitre();
+});
+	</script>
+
+{% endblock %}

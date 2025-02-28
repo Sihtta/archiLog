@@ -1,0 +1,54 @@
+<style>
+	.nav-link-custom {
+		font-size: 1.1rem;
+		color: rgba(255, 255, 255, 0.75);
+		transition: transform 0.3s ease, color 0.3s ease;
+	}
+
+	.nav-link-custom:hover {
+		color: #fff;
+	}
+
+	.nav-link-active {
+		font-weight: bold;
+		color: #fff;
+	}
+</style>
+
+<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+	<div class="container-fluid">
+		<a class="navbar-brand fs-3" href="{{ path('home.index') }}">To Do List</a>
+		<div class="d-flex">
+			<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+		</div>
+		<div class="collapse navbar-collapse" id="navbarColor01">
+			<ul class="navbar-nav me-auto">
+				<li class="nav-item">
+					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'home.index' ? 'nav-link-active' : '' }}" href="{{ path('home.index') }}">Accueil</a>
+				</li>
+			</ul>
+			<ul class="navbar-nav ms-auto">
+				{% if app.user %}
+					<li class="nav-item">
+						<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'user.edit' ? 'nav-link-active' : '' }}" href="{{ path('user.edit', {'id': app.user.id}) }}">Mon Profil</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link nav-link-custom" href="{{ path('security.logout') }}">Déconnexion</a>
+					</li>
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'security.login' ? 'nav-link-active' : '' }}" href="{{ path('security.login') }}">Connexion</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'security.registration' ? 'nav-link-active' : '' }}" href="{{ path('security.registration') }}">Inscription</a>
+					</li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
