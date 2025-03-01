@@ -2,7 +2,7 @@
 
 namespace App\EntityListener;
 
-use App\Entity\User;
+use App\Domain\User\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserListener
