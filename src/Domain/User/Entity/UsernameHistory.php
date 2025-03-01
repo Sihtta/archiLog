@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Domain\User\Entity;
 
-use App\Repository\UsernameHistoryRepository;
+use App\Domain\User\Repository\UsernameHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UsernameHistoryRepository::class)]

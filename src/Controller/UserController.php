@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Entity\UsernameHistory;
+use App\Domain\User\Entity\User;
+use App\Domain\User\Entity\UsernameHistory;
 use App\Form\UserPasswordType;
 use App\Form\UserType;
 use Doctrine\ORM\EntityManagerInterface;
