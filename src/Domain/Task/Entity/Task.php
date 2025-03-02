@@ -3,15 +3,16 @@
 namespace App\Domain\Task\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\TaskRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Domain\User\Entity\User;
 
-#[ORM\Entity(repositoryClass: TaskRepository::class)]
+#[ORM\Entity]
 class Task
 {
+    public const STATUS_TODO = 'todo';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_DONE = 'done';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -33,8 +34,8 @@ class Task
     private ?\DateTime $dueDate = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\Choice(["todo", "in_progress", "done"])]
-    private string $status = "todo";
+    #[Assert\Choice([self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])]
+    private string $status = self::STATUS_TODO;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
     #[ORM\JoinColumn(nullable: false)]
@@ -58,7 +59,6 @@ class Task
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -70,7 +70,6 @@ class Task
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -87,7 +86,6 @@ class Task
     public function setDueDate(?\DateTime $dueDate): static
     {
         $this->dueDate = $dueDate;
-
         return $this;
     }
 
@@ -99,7 +97,6 @@ class Task
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 
@@ -111,7 +108,11 @@ class Task
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
+    }
+
+    public function isDone(): bool
+    {
+        return $this->status === self::STATUS_DONE;
     }
 }
