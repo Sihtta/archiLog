@@ -2,10 +2,9 @@
 
 namespace App\Application\Port\Http\Controller;
 
+use App\Application\Service\TaskService;
 use App\Domain\Task\Entity\Task;
-use App\Domain\Task\Repository\TaskRepository;
 use App\Form\TaskFormType;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,17 +12,25 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TaskController extends AbstractController
 {
-    #[Route('/tasks', name: 'task_index')]
-    public function index(TaskRepository $taskRepository): Response
+    private TaskService $taskService;
+
+    public function __construct(TaskService $taskService)
     {
-        $tasks = $taskRepository->findBy([], ['createdAt' => 'DESC']);
+        $this->taskService = $taskService;
+    }
+
+    #[Route('/tasks', name: 'task_index')]
+    public function index(): Response
+    {
+        $tasks = $this->taskService->getAllTasks();
+
         return $this->render('pages/task/index.html.twig', [
             'tasks' => $tasks,
         ]);
     }
 
     #[Route('/tasks/new', name: 'task_create')]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    public function create(Request $request): Response
     {
         $user = $this->getUser();
 
@@ -32,15 +39,11 @@ class TaskController extends AbstractController
         }
 
         $task = new Task();
-        $task->setUser($user); 
-
         $form = $this->createForm(TaskFormType::class, $task);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($task);
-            $entityManager->flush();
-
+            $this->taskService->createTask($task->getTitle(), $user);
             $this->addFlash('success', 'Tâche créée avec succès !');
 
             return $this->redirectToRoute('task_index');
@@ -52,29 +55,30 @@ class TaskController extends AbstractController
     }
 
     #[Route('/tasks/{id}/edit', name: 'task_edit')]
-    public function edit(Task $task, Request $request, EntityManagerInterface $em): Response
+    public function edit(Task $task, Request $request): Response
     {
         $form = $this->createForm(TaskFormType::class, $task);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
+            $this->taskService->updateTask($task);
             $this->addFlash('success', 'Tâche mise à jour avec succès.');
+
             return $this->redirectToRoute('task_index');
         }
 
         return $this->render('pages/task/edit.html.twig', [
             'form' => $form->createView(),
-            'task' => $task
+            'task' => $task,
         ]);
     }
 
     #[Route('/tasks/{id}/delete', name: 'task_delete')]
-    public function delete(Task $task, EntityManagerInterface $em): Response
+    public function delete(Task $task): Response
     {
-        $em->remove($task);
-        $em->flush();
+        $this->taskService->deleteTask($task);
         $this->addFlash('success', 'Tâche supprimée.');
+
         return $this->redirectToRoute('task_index');
     }
 }

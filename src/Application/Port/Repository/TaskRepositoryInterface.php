@@ -3,8 +3,9 @@
 namespace App\Application\Port\Repository;
 
 use App\Domain\Task\Entity\Task;
+use Doctrine\Persistence\ObjectRepository;
 
-interface TaskRepositoryInterface
+interface TaskRepositoryInterface extends ObjectRepository
 {
     public function findByStatus(string $status): array;
 
