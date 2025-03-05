@@ -29,3 +29,11 @@ services:
   App\Infrastructure\Persistence\Doctrine\TaskRepository:
     arguments:
       $registry: "@doctrine"
+
+  App\Application\Service\Pomodoro\PomodoroTimer:
+    arguments:
+      $remainingTime: 1500 # Valeur par défaut ou autre
+
+  App\Application\Service\PomodoroService:
+    arguments:
+      $requestStack: "@request_stack"

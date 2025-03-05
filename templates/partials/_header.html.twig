@@ -28,6 +28,9 @@
 				<li class="nav-item">
 					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'home.index' ? 'nav-link-active' : '' }}" href="{{ path('home.index') }}">Accueil</a>
 				</li>
+				<li class="nav-item">
+					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'pomodoro_index' ? 'nav-link-active' : '' }}" href="{{ path('pomodoro_index') }}">Pomodoro</a>
+				</li>
 			</ul>
 			<ul class="navbar-nav ms-auto">
 				{% if app.user %}

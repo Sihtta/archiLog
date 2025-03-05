@@ -1,0 +1,94 @@
+{# templates/pomodoro/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Minuteur Pomodoro
+{% endblock %}
+
+{% block body %}
+	<div class="container text-center">
+		<h1 class="mt-5">Minuteur Pomodoro</h1>
+		<div class="my-3" style="font-size: 3rem;">
+			<strong>Temps restant :</strong>
+			{% set minutes = remainingTime / 60 %}
+			{% set seconds = remainingTime % 60 %}
+			<span id="timer-display">{{ '%02d'|format(minutes) ~ ':' ~ '%02d'|format(seconds) }}</span>
+		</div>
+		<div class="my-3">
+			<strong>État :</strong>
+			<span id="timer-state">{{ isRunning ? 'Le minuteur est en marche' : 'Le minuteur est en pause' }}</span>
+		</div>
+		<div class="mt-4">
+			<button class="btn btn-success" onclick="startTimer()">Démarrer</button>
+			<button class="btn btn-warning" onclick="pauseTimer()">Pause</button>
+			<button class="btn btn-danger" onclick="resetTimer()">Réinitialiser</button>
+		</div>
+		<div class="mt-4">
+			<h2>Sélectionner la stratégie Pomodoro</h2>
+			<button class="btn btn-primary" onclick="changeStrategy('short')">15 minutes</button>
+			<button class="btn btn-primary" onclick="changeStrategy('standard')">25 minutes</button>
+			<button class="btn btn-primary" onclick="changeStrategy('long')">45 minutes</button>
+		</div>
+	</div>
+
+	<script>
+		var remainingTime = {{ remainingTime }};
+var isRunning = {{ isRunning ? 'true' : 'false' }};
+var interval;
+var lastTime;
+
+// Fonction pour démarrer le timer
+function startTimer() {
+if (! isRunning) {
+isRunning = true;
+lastTime = Date.now();
+requestAnimationFrame(updateTimer); // Commence la mise à jour du timer
+document.getElementById('timer-state').textContent = "Le minuteur est en marche";
+}
+}
+
+// Fonction pour mettre en pause le timer
+function pauseTimer() {
+isRunning = false;
+document.getElementById('timer-state').textContent = "Le minuteur est en pause";
+}
+
+// Fonction pour réinitialiser le timer
+function resetTimer() {
+isRunning = false;
+remainingTime = {{ remainingTime }}; // Réinitialise le temps à la valeur de départ
+document.getElementById('timer-state').textContent = "Le minuteur est en pause";
+updateTimerDisplay();
+}
+
+// Fonction pour changer la stratégie du timer
+function changeStrategy(duration) {
+window.location.href = '/pomodoro/strategy/' + duration;
+}
+
+// Fonction pour mettre à jour le timer
+function updateTimer() {
+if (isRunning && remainingTime > 0) {
+var now = Date.now();
+var elapsedTime = (now - lastTime) / 1000; // Temps écoulé en secondes
+if (elapsedTime >= 1) { // Met à jour toutes les secondes
+remainingTime -= Math.floor(elapsedTime); // Décrémente le temps restant
+lastTime = now;
+updateTimerDisplay();
+}
+requestAnimationFrame(updateTimer); // Demande une nouvelle mise à jour à la prochaine frame
+}
+}
+
+// Fonction pour afficher le timer
+function updateTimerDisplay() {
+var minutes = Math.floor(remainingTime / 60);
+var seconds = remainingTime % 60;
+document.getElementById('timer-display').textContent = ('0' + minutes).slice(-2) + ':' + (
+'0' + seconds
+).slice(-2);
+}
+
+// Initialisation du timer à l'état actuel (réinitialisation automatique au chargement de la page)
+resetTimer(); // Appel de la fonction pour réinitialiser le timer
+	</script>
+{% endblock %}

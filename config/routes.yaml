@@ -3,3 +3,30 @@ controllers:
     path: "../src/Application/Port/Http/Controller/"
     namespace: App\Application\Port\Http\Controller
   type: attribute
+
+pomodoro_index:
+  path: /pomodoro
+  controller: App\Application\Port\Http\Controller\PomodoroController::index
+
+pomodoro_start:
+  path: /pomodoro/start
+  controller: App\Application\Port\Http\Controller\PomodoroController::start
+
+pomodoro_pause:
+  path: /pomodoro/pause
+  controller: App\Application\Port\Http\Controller\PomodoroController::pause
+
+pomodoro_reset:
+  path: /pomodoro/reset
+  controller: App\Application\Port\Http\Controller\PomodoroController::reset
+
+pomodoro_strategy:
+  path: /pomodoro/strategy/{duration}
+  controller: App\Application\Port\Http\Controller\PomodoroController::changeStrategy
+  requirements:
+    duration: "short|standard|long" # Accept only short, standard, or long
+
+# Nouvelle route pour le "tick" du timer
+pomodoro_tick:
+  path: /pomodoro/tick
+  controller: App\Application\Port\Http\Controller\PomodoroController::tick
