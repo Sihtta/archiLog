@@ -24,7 +24,7 @@ class RegistrationType extends AbstractType
                     'minlength' => '2',
                     'maxlenght' => '50',
                 ],
-                'label' => 'Nom / Prénom',
+                'label' => 'Nom / PrÃ©nom',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
                 ],
@@ -88,7 +88,7 @@ class RegistrationType extends AbstractType
             ])
             ->add('Submit', SubmitType::class, [
                 'attr' => [
-                    'class' => 'btn btn-primary mt-4'
+                    'class' => 'btn btn-primary mt-4 w-100'
                 ],
                 'label' => 'S\'inscrire'
             ]);

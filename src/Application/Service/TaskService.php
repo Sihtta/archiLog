@@ -17,10 +17,12 @@ class TaskService
         $this->entityManager = $entityManager;
     }
 
-    public function createTask(string $title, $user): Task
+    public function createTask(string $title, ?string $description, ?\DateTime $dueDate, $user): Task
     {
         $task = new Task();
         $task->setTitle($title);
+        $task->setDescription($description);
+        $task->setDueDate($dueDate);
         $task->setUser($user);
 
         $this->entityManager->persist($task);
@@ -43,5 +45,11 @@ class TaskService
     public function getAllTasks(): array
     {
         return $this->taskRepository->findBy([], ['createdAt' => 'DESC']);
+    }
+
+    public function updateTaskStatus(Task $task, string $status): void
+    {
+        $task->setStatus($status);
+        $this->entityManager->flush();
     }
 }

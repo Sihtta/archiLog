@@ -43,7 +43,12 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->taskService->createTask($task->getTitle(), $user);
+            $this->taskService->createTask(
+                $task->getTitle(),
+                $task->getDescription(),
+                $task->getDueDate(),
+                $user
+            );
             $this->addFlash('success', 'Tâche créée avec succès !');
 
             return $this->redirectToRoute('task_index');
@@ -78,6 +83,19 @@ class TaskController extends AbstractController
     {
         $this->taskService->deleteTask($task);
         $this->addFlash('success', 'Tâche supprimée.');
+
+        return $this->redirectToRoute('task_index');
+    }
+
+    #[Route('/tasks/{id}/move/{status}', name: 'task_move')]
+    public function moveTask(Task $task, string $status): Response
+    {
+        if (!in_array($status, [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS, Task::STATUS_DONE])) {
+            throw $this->createNotFoundException("Statut invalide");
+        }
+
+        $this->taskService->updateTaskStatus($task, $status);
+        $this->addFlash('success', 'Statut de la tâche mis à jour.');
 
         return $this->redirectToRoute('task_index');
     }

@@ -3,167 +3,173 @@
 {% block title %}Liste des Tâches{% endblock %}
 
 {% block body %}
-<style>
-		.main-section {
-			display: flex;
-			height: 100vh;
-			background-color: #1a1a1a;
-			color: #fff;
-			font-family: 'Poppins', sans-serif;
-			flex-wrap: wrap;
-		}
+<div class="task-header">
+    <h1>Liste des Tâches</h1>
+    <a href="{{ path('task_create') }}" class="btn btn-primary">Créer une tâche</a>
+</div>
 
-		.left-side {
-			flex: 1;
-			background: url('/images/2024-12-13-72f878a2-a5e2-4891-b30e-e599efedfda1.avif') no-repeat center center;
-			background-size: cover;
-			min-height: 300px;
-			background-position: center top;
-		}
-
-		.right-side {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: flex-start;
-			padding: 40px;
-		}
-
-		.right-side h1 {
-			font-size: 4rem;
-			max-width: 90%;
-			color: white;
-			margin: 0;
-			text-transform: uppercase;
-			line-height: 1.2;
-		}
-
-		.right-side p {
-			font-size: 1rem;
-			margin: 20px 0 30px;
-			line-height: 1.8;
-		}
-
-		.buttons {
-			display: flex;
-			gap: 20px;
-		}
-
-		.btn {
-			text-decoration: none;
-			color: #fff;
-			padding: 12px 24px;
-			border: 2px solid #fff;
-			border-radius: 30px;
-			transition: all 0.3s ease;
-			font-weight: 500;
-		}
-
-		.btn:hover {
-			background-color: #fff;
-			color: #1a1a1a;
-			transform: translateY(-2px);
-		}
-
-		#typed-text {
-			font-size: 4rem;
-			max-width: 90%;
-			color: #fff;
-			white-space: pre-wrap;
-			overflow: hidden;
-		}
-
-		@media(max-width: 1200px) {
-			.right-side h1,
-			#typed-text {
-				font-size: 3rem;
-			}
-		}
-
-		@media(max-width: 992px) {
-			.main-section {
-				flex-direction: column;
-			}
-
-			.left-side {
-				background-position: center center;
-				min-height: 200px;
-			}
-
-			.right-side {
-				padding: 30px;
-				text-align: center;
-				align-items: center;
-			}
-
-			.right-side h1,
-			#typed-text {
-				font-size: 2.5rem;
-			}
-
-			.right-side p {
-				font-size: 1.1rem;
-				margin: 20px 0 25px;
-			}
-
-			.buttons {
-				justify-content: center;
-			}
-
-			.btn {
-				width: 80%;
-				max-width: 250px;
-			}
-		}
-
-		@media(max-width: 768px) {
-			.right-side h1,
-			#typed-text {
-				font-size: 2rem;
-			}
-
-			.right-side p {
-				font-size: 1rem;
-				margin: 15px 0 20px;
-			}
-
-			.btn {
-				width: 100%;
-				max-width: 200px;
-				padding: 8px 16px;
-			}
-		}
-	</style>
-<h1>Liste des Tâches</h1>
-<a href="{{ path('task_create') }}" class="btn btn-primary">Créer une tâche</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Titre</th>
-            <th>Description</th>
-            <th>Statut</th>
-            <th>Date limite</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="task-container">
+    <div class="task-column">
+        <h2>À faire</h2>
         {% for task in tasks %}
-        <tr>
-            <td>{{ task.title }}</td>
-            <td>{{ task.description|slice(0, 50) ~ '...' }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Aucune' }}</td>
-            <td>
-                <a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
-                <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="5">Aucune tâche trouvée.</td>
-        </tr>
+            {% if task.status == 'todo' %}
+                <div class="task-card">
+                    <h3>{{ task.title }}</h3>
+                    <p class="task-desc">{{ task.description }}</p>
+                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+                    <div class="task-actions">
+                        <a href="{{ path('task_move', {id: task.id, status: 'in_progress'}) }}" class="btn btn-info">Commencer</a>
+                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+                    </div>
+                </div>
+            {% endif %}
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+
+    <div class="task-column">
+        <h2>En cours</h2>
+        {% for task in tasks %}
+            {% if task.status == 'in_progress' %}
+                <div class="task-card">
+                    <h3>{{ task.title }}</h3>
+                    <p class="task-desc">{{ task.description }}</p>
+                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+                    <div class="task-actions">
+                        <a href="{{ path('task_move', {id: task.id, status: 'done'}) }}" class="btn btn-success">Terminer</a>
+                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="task-column">
+        <h2>Terminées</h2>
+        {% for task in tasks %}
+            {% if task.status == 'done' %}
+                <div class="task-card task-done">
+                    <h3>{{ task.title }}</h3>
+                    <p class="task-desc">{{ task.description }}</p>
+                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+                    <div class="task-actions">
+                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .task-container {
+        display: flex;
+        gap: 20px;
+        justify-content: space-around;
+        padding: 20px;
+    }
+
+    .task-column {
+        flex: 1;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .task-column h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    .task-card {
+        background: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+        border-left: 5px solid #007bff;
+    }
+
+    .task-done {
+        border-left: 5px solid #28a745;
+    }
+
+    .task-card h3 {
+        margin: 0;
+        font-size: 1.2em;
+    }
+
+    .task-desc {
+        font-size: 0.9em;
+        color: #555;
+        margin: 5px 0;
+    }
+
+    .task-date {
+        font-size: 0.8em;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Boutons */
+    .task-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        text-align: center;
+        display: inline-block;
+        transition: 0.3s;
+    }
+
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background: #138496;
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background: #218838;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+	
+	.task-header {
+		margin-top: 30px;
+		margin-left: auto;
+		margin-right: auto;
+		max-width: 80%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px;
+	}
+</style>
 {% endblock %}

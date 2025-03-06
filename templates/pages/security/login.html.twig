@@ -14,14 +14,12 @@
 	<div class="container">
 		<h1>Formulaire de<br>connexion</h1>
 
-		{% for message in app.flashes('success') %}
-			<div class="alert alert-success mt-4">{{ message }}</div>
-		{% endfor %}
 		{% if error %}
 			<div class="alert alert-danger mt-4">
-				{{ error.messageKey|trans(error.messageData, 'security') }}
+				Identifiants incorrects, veuillez rÃ©essayer.
 			</div>
 		{% endif %}
+
 
 		<form id="loginForm" action="{{ path('security.login') }}" method="post">
 			<div class="floating-label">
@@ -53,7 +51,7 @@
 				document.getElementById('js-enabled').value = '1';
 			</script>
 
-			<button type="submit" class="btn btn-primary mt-4" id="submitBtn">Se connecter</button>
+			<button type="submit" class="btn btn-primary mt-4 w-100" id="submitBtn">Se connecter</button>
 		</form>
 	</div>
 
