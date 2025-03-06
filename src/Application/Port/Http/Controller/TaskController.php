@@ -22,6 +22,10 @@ class TaskController extends AbstractController
     #[Route('/tasks', name: 'task_index')]
     public function index(): Response
     {
+        if (!$this->getUser()) {
+            return $this->redirectToRoute('security.login');
+        }
+
         $tasks = $this->taskService->getAllTasks();
 
         return $this->render('pages/task/index.html.twig', [
