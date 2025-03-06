@@ -1,123 +1,50 @@
 <?php
 
-// src/Application/Service/PomodoroService.php
+// src/Application/Service/Pomodoro/PomodoroService.php
 
 namespace App\Application\Service;
 
-use App\Application\Service\Pomodoro\PomodoroTimer;
 use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;
-use App\Application\Service\Pomodoro\Strategy\ShortPomodoroStrategy;
-use App\Application\Service\Pomodoro\Strategy\StandardPomodoroStrategy;
-use App\Application\Service\Pomodoro\Strategy\LongPomodoroStrategy;
 use Symfony\Component\HttpFoundation\RequestStack;
-use App\Domain\Task\Entity\Task;
 
 class PomodoroService
 {
-    private PomodoroTimer $timer;
-    private RequestStack $requestStack;
-    private array $tasks = [];
+    private $strategy;
+    private $remainingTime;
+    private $isRunning;
+    private $requestStack;
 
-    public function __construct(PomodoroTimer $timer, RequestStack $requestStack)
+    public function __construct(PomodoroStrategyInterface $defaultStrategy, RequestStack $requestStack)
     {
-        $this->timer = $timer;
+        $this->strategy = $defaultStrategy;
+        $this->remainingTime = $this->strategy->getDuration();
+        $this->isRunning = false;
         $this->requestStack = $requestStack;
-        $this->loadTimerStateFromSession();
-
-        // Assurer que le timer commence en pause par défaut.
-        if (!$this->timer->isTimerRunning()) {
-            $this->timer->pause();
-        }
     }
 
-
-    public function startTimer(): void
+    // Applique une nouvelle stratégie
+    public function setStrategy(PomodoroStrategyInterface $strategy): void
     {
-        if (!$this->timer->isTimerRunning()) {
-            $this->timer->start();
-            $this->saveTimerStateToSession();
-        }
+        $this->strategy = $strategy;
+        $this->remainingTime = $this->strategy->getDuration();
+        $this->isRunning = false;  // Assure que le timer est mis en pause
     }
 
-    public function pauseTimer(): void
-    {
-        $this->timer->pause();
-        $this->saveTimerStateToSession();
-    }
-
-    public function resetTimer(): void
-    {
-        $this->timer->reset();
-        $this->tasks = [];
-        $this->saveTimerStateToSession();
-    }
-
+    // Obtient le temps restant
     public function getRemainingTime(): int
     {
-        return $this->timer->getRemainingTime();
+        return $this->remainingTime;
     }
 
-    public function changeStrategy(PomodoroStrategyInterface $strategy): void
+    // Démarre ou met en pause le timer
+    public function toggleRunning(): void
     {
-        $this->timer->setStrategy($strategy);
-        $this->saveStrategyToSession($strategy);
-        $this->saveTimerStateToSession();
+        $this->isRunning = !$this->isRunning;
     }
 
-    public function addTaskToSession(Task $task): void
+    // Retourne si le timer est en cours d'exécution
+    public function isRunning(): bool
     {
-        $this->tasks[] = $task;
-    }
-
-    public function getTasks(): array
-    {
-        return $this->tasks;
-    }
-
-    public function getTimerState(): string
-    {
-        return $this->timer->isTimerRunning() ? 'Running' : 'Paused';
-    }
-
-    public function tick(): void
-    {
-        $this->timer->tick();
-        $this->saveTimerStateToSession();
-    }
-
-    private function saveStrategyToSession(PomodoroStrategyInterface $strategy): void
-    {
-        $session = $this->requestStack->getSession();
-        $session->set('pomodoro_strategy', get_class($strategy));
-    }
-
-    private function loadStrategyFromSession(): void
-    {
-        $session = $this->requestStack->getSession();
-        $strategyClass = $session->get('pomodoro_strategy', StandardPomodoroStrategy::class);
-        $this->changeStrategy(new $strategyClass());
-    }
-
-    private function saveTimerStateToSession(): void
-    {
-        $session = $this->requestStack->getSession();
-        $session->set('remaining_time', $this->timer->getRemainingTime());
-        $session->set('is_running', $this->timer->isTimerRunning());
-    }
-
-    private function loadTimerStateFromSession(): void
-    {
-        $session = $this->requestStack->getSession();
-        $remainingTime = $session->get('remaining_time', 1500); // 25 minutes par défaut
-        $isRunning = $session->get('is_running', false);
-
-        // Si le timer n'est pas en marche (figé), il doit être en pause par défaut
-        if (!$isRunning) {
-            $this->timer = new PomodoroTimer($remainingTime);
-            $this->timer->pause();  // Assurer qu'il est en pause
-        } else {
-            $this->timer = new PomodoroTimer($remainingTime);
-            $this->timer->start();  // Si en marche, on le démarre
-        }
+        return $this->isRunning;
     }
 }

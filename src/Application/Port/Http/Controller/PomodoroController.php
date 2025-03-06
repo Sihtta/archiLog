@@ -5,82 +5,53 @@
 namespace App\Application\Port\Http\Controller;
 
 use App\Application\Service\PomodoroService;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Application\Service\Pomodoro\Strategy\ShortPomodoroStrategy;
-use App\Application\Service\Pomodoro\Strategy\StandardPomodoroStrategy;
-use App\Application\Service\Pomodoro\Strategy\LongPomodoroStrategy;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class PomodoroController extends AbstractController
 {
-    private PomodoroService $pomodoroService;
+    private $pomodoroService;
+    private $strategies;
 
-    public function __construct(PomodoroService $pomodoroService)
+    // Injection des stratégies Pomodoro et du service
+    public function __construct(PomodoroService $pomodoroService, array $strategies)
     {
         $this->pomodoroService = $pomodoroService;
+        $this->strategies = $strategies;
     }
 
-    /**
-     * @Route("/pomodoro", name="pomodoro_index")
-     */
-    public function index()
+    // Route pour afficher le timer
+    #[Route('/pomodoro', name: 'pomodoro_index')]
+    public function index(): Response
     {
         $remainingTime = $this->pomodoroService->getRemainingTime();
-        $isRunning = $this->pomodoroService->getTimerState() === 'Running';
+        $isRunning = $this->pomodoroService->isRunning();
 
         return $this->render('pages/pomodoro/index.html.twig', [
             'remainingTime' => $remainingTime,
-            'isRunning' => $isRunning
+            'isRunning' => $isRunning,
         ]);
-    }
-
-    /**
-     * @Route("/pomodoro/start", name="pomodoro_start")
-     */
-    public function start()
-    {
-        $this->pomodoroService->startTimer();
-        return $this->redirectToRoute('pomodoro_index');
-    }
-
-    /**
-     * @Route("/pomodoro/pause", name="pomodoro_pause")
-     */
-    public function pause()
-    {
-        $this->pomodoroService->pauseTimer();
-        return $this->redirectToRoute('pomodoro_index');
-    }
-
-    /**
-     * @Route("/pomodoro/reset", name="pomodoro_reset")
-     */
-    public function reset()
-    {
-        $this->pomodoroService->resetTimer();
-        return $this->redirectToRoute('pomodoro_index');
     }
 
     /**
      * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
      */
-    public function setStrategy(string $duration)
+    public function changeStrategy(string $duration): Response
     {
-        switch ($duration) {
-            case 'short':
-                $this->pomodoroService->changeStrategy(new ShortPomodoroStrategy());
-                break;
-            case 'standard':
-                $this->pomodoroService->changeStrategy(new StandardPomodoroStrategy());
-                break;
-            case 'long':
-                $this->pomodoroService->changeStrategy(new LongPomodoroStrategy());
-                break;
-            default:
-                return $this->redirectToRoute('pomodoro_index');
+        // Vérifie si la stratégie existe
+        if (!isset($this->strategies[$duration])) {
+            throw new \InvalidArgumentException('Invalid strategy name.');
         }
 
-        return $this->redirectToRoute('pomodoro_index');
+        $strategy = $this->strategies[$duration];
+        $durationInSeconds = $strategy->getDuration();
+
+        // Met à jour le timer avec la nouvelle durée
+        return $this->render('pages/pomodoro/index.html.twig', [
+            'remainingTime' => $durationInSeconds,
+            'isRunning' => false, // Timer est en pause par défaut
+        ]);
     }
 }

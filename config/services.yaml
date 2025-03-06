@@ -1,9 +1,7 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
+# config/services.yaml
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+  # ...
 
 services:
   # default configuration for services in *this* file
@@ -20,20 +18,31 @@ services:
       - "../src/Entity/"
       - "../src/Kernel.php"
 
-  # Here, you inject the interface rather than the concrete repository class
-  App\Application\Service\TaskService:
-    arguments:
-      $taskRepository: '@App\Infrastructure\Persistence\Doctrine\TaskRepository'
-
   # Explicit service definition for TaskRepository
   App\Infrastructure\Persistence\Doctrine\TaskRepository:
     arguments:
       $registry: "@doctrine"
 
-  App\Application\Service\Pomodoro\PomodoroTimer:
-    arguments:
-      $remainingTime: 1500 # Valeur par défaut ou autre
+  App\Application\Service\Pomodoro\Strategy\ShortPomodoroStrategy:
+    tags: ["pomodoro.strategy"]
+
+  App\Application\Service\Pomodoro\Strategy\StandardPomodoroStrategy:
+    tags: ["pomodoro.strategy"]
+
+  App\Application\Service\Pomodoro\Strategy\LongPomodoroStrategy:
+    tags: ["pomodoro.strategy"]
 
   App\Application\Service\PomodoroService:
     arguments:
+      $defaultStrategy: '@App\Application\Service\Pomodoro\Strategy\StandardPomodoroStrategy'
       $requestStack: "@request_stack"
+
+  # Controller service definition with injected services
+  App\Application\Port\Http\Controller\PomodoroController:
+    arguments:
+      $pomodoroService: '@App\Application\Service\PomodoroService'
+      $strategies:
+        "short": '@App\Application\Service\Pomodoro\Strategy\ShortPomodoroStrategy'
+        "standard": '@App\Application\Service\Pomodoro\Strategy\StandardPomodoroStrategy'
+        "long": '@App\Application\Service\Pomodoro\Strategy\LongPomodoroStrategy'
+    tags: ["controller.service_arguments"]

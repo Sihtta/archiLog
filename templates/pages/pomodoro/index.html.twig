@@ -1,4 +1,5 @@
-{# templates/pomodoro/index.html.twig #}
+{# templates/pages/pomodoro/index.html.twig #}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Minuteur Pomodoro
@@ -9,7 +10,7 @@
 		<h1 class="mt-5">Minuteur Pomodoro</h1>
 		<div class="my-3" style="font-size: 3rem;">
 			<strong>Temps restant :</strong>
-			{% set minutes = remainingTime / 60 %}
+			{% set minutes = remainingTime // 60 %}
 			{% set seconds = remainingTime % 60 %}
 			<span id="timer-display">{{ '%02d'|format(minutes) ~ ':' ~ '%02d'|format(seconds) }}</span>
 		</div>
@@ -24,9 +25,11 @@
 		</div>
 		<div class="mt-4">
 			<h2>Sélectionner la stratégie Pomodoro</h2>
-			<button class="btn btn-primary" onclick="changeStrategy('short')">15 minutes</button>
-			<button class="btn btn-primary" onclick="changeStrategy('standard')">25 minutes</button>
-			<button class="btn btn-primary" onclick="changeStrategy('long')">45 minutes</button>
+			<button class="btn btn-primary" onclick="window.location.href='{{ path('pomodoro_strategy', {'duration': 'short'}) }}'">15 minutes</button>
+			<button class="btn btn-primary" onclick="window.location.href='{{ path('pomodoro_strategy', {'duration': 'standard'}) }}'">25 minutes</button>
+			<button class="btn btn-primary" onclick="window.location.href='{{ path('pomodoro_strategy', {'duration': 'long'}) }}'">45 minutes</button>
+
+
 		</div>
 	</div>
 
@@ -55,14 +58,9 @@ document.getElementById('timer-state').textContent = "Le minuteur est en pause";
 // Fonction pour réinitialiser le timer
 function resetTimer() {
 isRunning = false;
-remainingTime = {{ remainingTime }}; // Réinitialise le temps à la valeur de départ
+remainingTime = {{ remainingTime }};
 document.getElementById('timer-state').textContent = "Le minuteur est en pause";
 updateTimerDisplay();
-}
-
-// Fonction pour changer la stratégie du timer
-function changeStrategy(duration) {
-window.location.href = '/pomodoro/strategy/' + duration;
 }
 
 // Fonction pour mettre à jour le timer
@@ -88,7 +86,7 @@ document.getElementById('timer-display').textContent = ('0' + minutes).slice(-2)
 ).slice(-2);
 }
 
-// Initialisation du timer à l'état actuel (réinitialisation automatique au chargement de la page)
-resetTimer(); // Appel de la fonction pour réinitialiser le timer
+// Initialisation du timer à l'état actuel
+updateTimerDisplay();
 	</script>
 {% endblock %}
