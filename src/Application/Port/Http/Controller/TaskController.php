@@ -26,7 +26,8 @@ class TaskController extends AbstractController
             return $this->redirectToRoute('security.login');
         }
 
-        $tasks = $this->taskService->getAllTasks();
+        $user = $this->getUser();
+        $tasks = $this->taskService->getTasksByUser($user);
 
         return $this->render('pages/task/index.html.twig', [
             'tasks' => $tasks,

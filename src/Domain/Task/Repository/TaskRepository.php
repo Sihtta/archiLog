@@ -13,10 +13,12 @@ class TaskRepository extends ServiceEntityRepository
         parent::__construct($registry, Task::class);
     }
 
-    public function findAll(): array
+    public function findByUser(int $userId): array
     {
         return $this->createQueryBuilder('t')
-            ->orderBy('t.id', 'DESC')
+            ->andWhere('t.user = :user')
+            ->setParameter('user', $userId)
+            ->orderBy('t.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }

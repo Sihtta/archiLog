@@ -42,9 +42,9 @@ class TaskService
         $this->entityManager->flush();
     }
 
-    public function getAllTasks(): array
+    public function getTasksByUser($user): array
     {
-        return $this->taskRepository->findBy([], ['createdAt' => 'DESC']);
+        return $this->taskRepository->findByUser($user->getId());
     }
 
     public function updateTaskStatus(Task $task, string $status): void
