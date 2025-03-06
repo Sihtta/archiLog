@@ -50,6 +50,15 @@ class TaskService
     public function updateTaskStatus(Task $task, string $status): void
     {
         $task->setStatus($status);
+
+        if ($status === Task::STATUS_DONE) {
+            $user = $task->getUser();
+            if ($user) {
+                $user->addExp(20);
+                $this->entityManager->persist($user);
+            }
+        }
+
         $this->entityManager->flush();
     }
 }

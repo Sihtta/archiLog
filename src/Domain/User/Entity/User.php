@@ -191,6 +191,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getTreeImage(): string
+    {
+        $levels = [100, 200, 300, 400, 500, 600, 700];
+        $imageIndex = 1;
+
+        foreach ($levels as $index => $xpThreshold) {
+            if ($this->exp >= $xpThreshold) {
+                $imageIndex = $index + 2;
+            }
+        }
+
+        return "images/{$imageIndex}.png";
+    }
+
+    public function getTreeSize(): int
+    {
+        $levels = [100, 200, 300, 400, 500, 600, 700];
+        $sizes = [30, 35, 45, 50, 55, 60, 65];
+        $sizeIndex = 0;
+
+        foreach ($levels as $index => $xpThreshold) {
+            if ($this->exp >= $xpThreshold) {
+                $sizeIndex = $index;
+            }
+        }
+
+        return $sizes[$sizeIndex] ?? 30;
+    }
+
     public function __toString(): string
     {
         return $this->pseudo ?: $this->fullName;
