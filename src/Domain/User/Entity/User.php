@@ -202,22 +202,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
-        return "images/{$imageIndex}.png";
+        return "images/" . min($imageIndex, 7) . ".png";
     }
 
     public function getTreeSize(): int
     {
         $levels = [100, 200, 300, 400, 500, 600, 700];
         $sizes = [30, 35, 45, 50, 55, 60, 65];
-        $sizeIndex = 0;
 
+        $sizeIndex = 0;
         foreach ($levels as $index => $xpThreshold) {
             if ($this->exp >= $xpThreshold) {
                 $sizeIndex = $index;
             }
         }
 
-        return $sizes[$sizeIndex] ?? 30;
+        return $sizes[min($sizeIndex, count($sizes) - 1)];
     }
 
     public function __toString(): string
