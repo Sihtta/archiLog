@@ -11,6 +11,7 @@ class TaskService
     private TaskRepositoryInterface $taskRepository;
     private EntityManagerInterface $entityManager;
     private NotificationService $notificationService;
+    private array $observers = [];
 
     public function __construct(
         TaskRepositoryInterface $taskRepository,
@@ -20,6 +21,9 @@ class TaskService
         $this->taskRepository = $taskRepository;
         $this->entityManager = $entityManager;
         $this->notificationService = $notificationService;
+
+        // Ajouter l'observateur NotificationService
+        $this->observers[] = $this->notificationService;
     }
 
     public function createTask(string $title, ?string $description, ?\DateTime $dueDate, $user): Task
@@ -52,6 +56,15 @@ class TaskService
         return $this->taskRepository->findByUser($user->getId());
     }
 
+    // Notifie tous les observateurs de l'événement
+    private function notifyObservers(string $message): void
+    {
+        foreach ($this->observers as $observer) {
+            $observer->update($message);
+        }
+    }
+
+    // Vérifie les deadlines et notifie les observateurs
     public function checkTaskDeadlines(): void
     {
         $tasks = $this->taskRepository->findTasksWithUpcomingDeadlines();
@@ -67,7 +80,8 @@ class TaskService
                 $fullName
             );
 
-            $this->notificationService->sendTaskStatusUpdate($message);
+            // Notifier les observateurs (ici, NotificationService)
+            $this->notifyObservers($message);
         }
     }
 
@@ -91,6 +105,7 @@ class TaskService
             $status
         );
 
-        $this->notificationService->sendTaskStatusUpdate($message);
+        // Notifier les observateurs (ici, NotificationService)
+        $this->notifyObservers($message);
     }
 }
