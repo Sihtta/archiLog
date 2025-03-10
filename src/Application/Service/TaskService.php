@@ -10,11 +10,16 @@ class TaskService
 {
     private TaskRepositoryInterface $taskRepository;
     private EntityManagerInterface $entityManager;
+    private NotificationService $notificationService;
 
-    public function __construct(TaskRepositoryInterface $taskRepository, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        TaskRepositoryInterface $taskRepository,
+        EntityManagerInterface $entityManager,
+        NotificationService $notificationService
+    ) {
         $this->taskRepository = $taskRepository;
         $this->entityManager = $entityManager;
+        $this->notificationService = $notificationService;
     }
 
     public function createTask(string $title, ?string $description, ?\DateTime $dueDate, $user): Task
@@ -47,6 +52,25 @@ class TaskService
         return $this->taskRepository->findByUser($user->getId());
     }
 
+    public function checkTaskDeadlines(): void
+    {
+        $tasks = $this->taskRepository->findTasksWithUpcomingDeadlines();
+
+        foreach ($tasks as $task) {
+            $user = $task->getUser();
+            $fullName = $user ? $user->getFullName() : 'Utilisateur inconnu';
+
+            $message = sprintf(
+                "⚠️ La tâche **%s** arrive à échéance le %s !\n\nPersonne concernée : %s",
+                $task->getTitle(),
+                $task->getDueDate()?->format('d/m/Y H:i'),
+                $fullName
+            );
+
+            $this->notificationService->sendTaskStatusUpdate($message);
+        }
+    }
+
     public function updateTaskStatus(Task $task, string $status): void
     {
         $task->setStatus($status);
@@ -60,5 +84,13 @@ class TaskService
         }
 
         $this->entityManager->flush();
+
+        $message = sprintf(
+            "La tâche **%s** a été mise à jour avec le statut : **%s**",
+            $task->getTitle(),
+            $status
+        );
+
+        $this->notificationService->sendTaskStatusUpdate($message);
     }
 }

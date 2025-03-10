@@ -14,4 +14,6 @@ interface TaskRepositoryInterface extends ObjectRepository
     public function save(Task $task): void;
 
     public function delete(Task $task): void;
+
+    public function findTasksWithUpcomingDeadlines(): array;
 }
