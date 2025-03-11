@@ -11,16 +11,19 @@ class TaskService
     private TaskRepositoryInterface $taskRepository;
     private EntityManagerInterface $entityManager;
     private NotificationService $notificationService;
+    private TaskReportService $taskReportService;
     private array $observers = [];
 
     public function __construct(
         TaskRepositoryInterface $taskRepository,
         EntityManagerInterface $entityManager,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        TaskReportService $taskReportService
     ) {
         $this->taskRepository = $taskRepository;
         $this->entityManager = $entityManager;
         $this->notificationService = $notificationService;
+        $this->taskReportService = $taskReportService;
 
         // Ajouter l'observateur NotificationService
         $this->observers[] = $this->notificationService;
@@ -91,12 +94,20 @@ class TaskService
 
         if ($status === Task::STATUS_DONE) {
             $user = $task->getUser();
+            $task->setCompletedAt(new \DateTime());
+
             if ($user) {
                 $user->addExp(20);
                 $this->entityManager->persist($user);
             }
+
+            // Générer le rapport des tâches terminées
+            $this->taskReportService->generateDailyReport();
+        } else {
+            $task->setCompletedAt(null);
         }
 
+        $this->entityManager->persist($task);
         $this->entityManager->flush();
 
         $message = sprintf(

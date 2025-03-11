@@ -3,45 +3,55 @@
 namespace App\Application\Service;
 
 use App\Domain\Task\Entity\Task;
-use Symfony\Component\Filesystem\Filesystem;
+use Doctrine\ORM\EntityManagerInterface;
 
 class TaskReportService
 {
     private string $reportDirectory;
-    private Filesystem $filesystem;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(string $reportDirectory)
+    public function __construct(string $reportDirectory, EntityManagerInterface $entityManager)
     {
         $this->reportDirectory = $reportDirectory;
-        $this->filesystem = new Filesystem();
+        $this->entityManager = $entityManager;
     }
 
-    public function logCompletedTask(Task $task): void
+    public function generateDailyReport(): void
     {
-        // Vérifier si la tâche est terminée
-        if (!$task->getCompletedAt()) {
-            return; // Ne rien faire si la tâche n'est pas terminée
+        $today = (new \DateTime())->format('Y-m-d');
+        $filePath = $this->reportDirectory . "/tasks_completed_{$today}.csv";
+
+        // Récupérer les tâches terminées aujourd'hui
+        $tasks = $this->entityManager->getRepository(Task::class)
+            ->createQueryBuilder('t')
+            ->where('t.completedAt IS NOT NULL')
+            ->andWhere('t.completedAt >= :startOfDay')
+            ->setParameter('startOfDay', new \DateTime('today'))
+            ->orderBy('t.completedAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        if (empty($tasks)) {
+            return; // Rien à enregistrer
         }
 
-        // Générer le nom du fichier du jour
-        $date = new \DateTime();
-        $fileName = $date->format('Y-m-d') . '.csv';
-        $filePath = $this->reportDirectory . DIRECTORY_SEPARATOR . $fileName;
+        // Création du fichier s'il n'existe pas
+        $handle = fopen($filePath, 'w');
 
-        // Créer le fichier si nécessaire
-        if (!$this->filesystem->exists($filePath)) {
-            $this->filesystem->touch($filePath);
-            // Ajouter l'en-tête CSV si le fichier est créé
-            file_put_contents($filePath, "Title,Description,Completion Time\n", FILE_APPEND);
+        // Ajouter les en-têtes CSV
+        fputcsv($handle, ['ID', 'Titre', 'Description', 'Utilisateur', 'Date de complétion']);
+
+        // Ajouter les tâches au fichier
+        foreach ($tasks as $task) {
+            fputcsv($handle, [
+                $task->getId(),
+                $task->getTitle(),
+                $task->getDescription(),
+                $task->getUser()?->getEmail(), // Ou un autre identifiant utilisateur
+                $task->getCompletedAt()->format('Y-m-d H:i:s'),
+            ]);
         }
 
-        // Enregistrer les données de la tâche terminée dans le fichier
-        $line = sprintf(
-            "%s,%s,%s\n",
-            $task->getTitle(),
-            $task->getDescription(),
-            $task->getCompletedAt()->format('Y-m-d H:i:s')
-        );
-        file_put_contents($filePath, $line, FILE_APPEND);
+        fclose($handle);
     }
 }
