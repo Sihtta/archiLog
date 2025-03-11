@@ -12,46 +12,40 @@ class TaskReportService
 
     public function __construct(string $reportDirectory, EntityManagerInterface $entityManager)
     {
-        $this->reportDirectory = $reportDirectory;
+        $this->reportDirectory = rtrim($reportDirectory, '/');
         $this->entityManager = $entityManager;
     }
 
-    public function generateDailyReport(): void
+    public function logCompletedTask(Task $task): void
     {
-        $today = (new \DateTime())->format('Y-m-d');
-        $filePath = $this->reportDirectory . "/tasks_completed_{$today}.csv";
+        $date = (new \DateTime())->format('Y-m-d');
+        $filePath = "{$this->reportDirectory}/tasks_completed_{$date}.txt";
 
-        // Récupérer les tâches terminées aujourd'hui
-        $tasks = $this->entityManager->getRepository(Task::class)
-            ->createQueryBuilder('t')
-            ->where('t.completedAt IS NOT NULL')
-            ->andWhere('t.completedAt >= :startOfDay')
-            ->setParameter('startOfDay', new \DateTime('today'))
-            ->orderBy('t.completedAt', 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        if (empty($tasks)) {
-            return; // Rien à enregistrer
+        // Vérifier si la tâche est déjà enregistrée
+        if (file_exists($filePath)) {
+            $existingContent = file_get_contents($filePath);
+            if (str_contains($existingContent, "ID: {$task->getId()}")) {
+                return; // La tâche est déjà enregistrée, on ne l'ajoute pas à nouveau
+            }
         }
 
-        // Création du fichier s'il n'existe pas
-        $handle = fopen($filePath, 'w');
+        // Récupérer les infos supplémentaires
+        $description = $task->getDescription() ?: "Aucune description";
+        $dueDate = $task->getDueDate()?->format('d/m/Y H:i') ?: "Pas de date limite";
+        $userEmail = $task->getUser()?->getEmail() ?? "Email inconnu";
 
-        // Ajouter les en-têtes CSV
-        fputcsv($handle, ['ID', 'Titre', 'Description', 'Utilisateur', 'Date de complétion']);
+        // Ajouter la nouvelle tâche terminée avec les détails supplémentaires
+        $newEntry = sprintf(
+            "[%s] ID: %d | Tâche: %s | Description: %s | Date limite: %s | Utilisateur: %s (%s)\n",
+            $task->getCompletedAt()?->format('H:i:s'),
+            $task->getId(),
+            $task->getTitle(),
+            $description,
+            $dueDate,
+            $task->getUser()?->getFullName() ?? 'Inconnu',
+            $userEmail
+        );
 
-        // Ajouter les tâches au fichier
-        foreach ($tasks as $task) {
-            fputcsv($handle, [
-                $task->getId(),
-                $task->getTitle(),
-                $task->getDescription(),
-                $task->getUser()?->getEmail(), // Ou un autre identifiant utilisateur
-                $task->getCompletedAt()->format('Y-m-d H:i:s'),
-            ]);
-        }
-
-        fclose($handle);
+        file_put_contents($filePath, $newEntry, FILE_APPEND);
     }
 }

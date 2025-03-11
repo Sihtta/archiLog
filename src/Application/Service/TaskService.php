@@ -101,8 +101,8 @@ class TaskService
                 $this->entityManager->persist($user);
             }
 
-            // Générer le rapport des tâches terminées
-            $this->taskReportService->generateDailyReport();
+            // Enregistrer uniquement cette tâche dans le fichier
+            $this->taskReportService->logCompletedTask($task);
         } else {
             $task->setCompletedAt(null);
         }
