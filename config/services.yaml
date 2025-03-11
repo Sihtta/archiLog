@@ -55,3 +55,7 @@ services:
   App\Application\Service\NotificationService:
     arguments:
       $discordWebhookUrl: "%env(DISCORD_WEBHOOK_URL)%"
+
+  App\Application\Service\TaskReportService:
+    arguments:
+      $reportDirectory: "%kernel.project_dir%/var/reports"

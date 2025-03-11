@@ -41,6 +41,10 @@ class Task
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    // Le champ completedAt
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?\DateTime $completedAt = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -114,5 +118,18 @@ class Task
     public function isDone(): bool
     {
         return $this->status === self::STATUS_DONE;
+    }
+
+    // Ajout des méthodes getCompletedAt et setCompletedAt
+
+    public function getCompletedAt(): ?\DateTime
+    {
+        return $this->completedAt;
+    }
+
+    public function setCompletedAt(?\DateTime $completedAt): static
+    {
+        $this->completedAt = $completedAt;
+        return $this;
     }
 }
