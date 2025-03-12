@@ -17,7 +17,9 @@
 
 <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
 	<div class="container-fluid">
-		<a class="navbar-brand fs-3" href="{{ path('task_index') }}">To Do List</a>
+		<a class="navbar-brand fs-3" href="{{ path('home.index') }}">
+			<i class="fas fa-home fa-2x"></i>
+		</a>
 		<div class="d-flex">
 			<button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -26,7 +28,7 @@
 		<div class="collapse navbar-collapse" id="navbarColor01">
 			<ul class="navbar-nav me-auto">
 				<li class="nav-item">
-					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'home.index' ? 'nav-link-active' : '' }}" href="{{ path('home.index') }}">Accueil</a>
+					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'task_index' ? 'nav-link-active' : '' }}" href="{{ path('task_index') }}">To Do List</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link nav-link-custom {{ app.request.attributes.get('_route') == 'pomodoro_index' ? 'nav-link-active' : '' }}" href="{{ path('pomodoro_index') }}">Pomodoro</a>
@@ -53,5 +55,6 @@
 	</div>
 </nav>
 
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
