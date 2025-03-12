@@ -44,7 +44,7 @@ class UserController extends AbstractController
             $manager->persist($choosenUser);
             $manager->flush();
 
-            $this->addFlash('success', 'Les informations de votre compte ont bien été modifiées.');
+            $this->addFlash('success_edit_profile', 'Les informations de votre compte ont bien été modifiées.');
 
             return $this->redirectToRoute('user.edit', ['id' => $choosenUser->getId()]);
         }
@@ -70,14 +70,14 @@ class UserController extends AbstractController
                     $hasher->hashPassword($choosenUser, $form->getData()['newPassword'])
                 );
 
-                $this->addFlash('success', 'Le mot de passe a été modifié.');
+                $this->addFlash('success_password_change', 'Votre mot de passe a été mis à jour avec succès.');
 
                 $manager->persist($choosenUser);
                 $manager->flush();
 
                 return $this->redirectToRoute('user.edit.password', ['id' => $choosenUser->getId()]);
             } else {
-                $this->addFlash('warning', 'Le mot de passe renseigné est incorrect.');
+                $this->addFlash('warning_password_mismatch', 'Les mots de passe ne correspondent pas.');
             }
         }
 

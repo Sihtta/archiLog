@@ -7,11 +7,12 @@
 	<div class="container">
 		<h1 class="mt-4">Modifier mon profil</h1>
 
-		{% if error %}
-			<div class="alert alert-danger mt-4">
-				Identifiants incorrects, veuillez réessayer.
+		{% for message in app.flashes('success_edit_profile') %}
+			<div class="alert alert-success mt-4">
+				{{ message }}
 			</div>
-		{% endif %}
+		{% endfor %}
+
 
 		{{ form_start(form, { 'attr': { 'id': 'editProfileForm' } }) }}
 
