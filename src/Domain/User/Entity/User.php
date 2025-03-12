@@ -208,7 +208,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getTreeSize(): int
     {
         $levels = [100, 200, 300, 400, 500, 600, 700];
-        $sizes = [30, 55, 45, 50, 55, 60, 65];
+        $sizes = [30, 55, 45, 50, 55, 70, 75];
 
         $sizeIndex = 0;
         foreach ($levels as $index => $xpThreshold) {
