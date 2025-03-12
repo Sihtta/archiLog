@@ -1,0 +1,2 @@
+[19:49:32] ID: 38 | Tâche: Nvv | Description: c la nouvelle | Date limite: Pas de date limite | Utilisateur: moi (matthis.pourcelot@gmail.com)
+[19:50:02] ID: 39 | Tâche: NV2 | Description: Aucune description | Date limite: 11/03/2025 00:54 | Utilisateur: moi (matthis.pourcelot@gmail.com)
