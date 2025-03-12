@@ -29,12 +29,13 @@ class TaskService
         $this->observers[] = $this->notificationService;
     }
 
-    public function createTask(string $title, ?string $description, ?\DateTime $dueDate, $user): Task
+    public function createTask(string $title, ?string $description, ?\DateTime $dueDate, string $status, $user): Task
     {
         $task = new Task();
         $task->setTitle($title);
         $task->setDescription($description);
         $task->setDueDate($dueDate);
+        $task->setStatus($status);
         $task->setUser($user);
 
         $this->entityManager->persist($task);

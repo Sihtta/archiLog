@@ -52,6 +52,7 @@ class TaskController extends AbstractController
                 $task->getTitle(),
                 $task->getDescription(),
                 $task->getDueDate(),
+                $task->getStatus(),
                 $user
             );
             $this->addFlash('success', 'Tâche créée avec succès !');

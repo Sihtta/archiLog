@@ -35,7 +35,7 @@ class Task
 
     #[ORM\Column(length: 50)]
     #[Assert\Choice([self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])]
-    private string $status = self::STATUS_TODO;
+    private ?string $status = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
     #[ORM\JoinColumn(nullable: false)]
@@ -48,6 +48,9 @@ class Task
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        if ($this->status === null) {
+            $this->status = self::STATUS_TODO;
+        }
     }
 
     public function getId(): ?int
