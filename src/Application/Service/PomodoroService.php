@@ -11,40 +11,10 @@ class PomodoroService
 {
     private $strategy;
     private $remainingTime;
-    private $isRunning;
-    private $requestStack;
 
     public function __construct(PomodoroStrategyInterface $defaultStrategy, RequestStack $requestStack)
     {
         $this->strategy = $defaultStrategy;
         $this->remainingTime = $this->strategy->getDuration();
-        $this->isRunning = false;
-        $this->requestStack = $requestStack;
-    }
-
-    // Applique une nouvelle stratégie
-    public function setStrategy(PomodoroStrategyInterface $strategy): void
-    {
-        $this->strategy = $strategy;
-        $this->remainingTime = $this->strategy->getDuration();
-        $this->isRunning = false;  // Assure que le timer est mis en pause
-    }
-
-    // Obtient le temps restant
-    public function getRemainingTime(): int
-    {
-        return $this->remainingTime;
-    }
-
-    // Démarre ou met en pause le timer
-    public function toggleRunning(): void
-    {
-        $this->isRunning = !$this->isRunning;
-    }
-
-    // Retourne si le timer est en cours d'exécution
-    public function isRunning(): bool
-    {
-        return $this->isRunning;
     }
 }

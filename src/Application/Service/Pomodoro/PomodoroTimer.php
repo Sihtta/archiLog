@@ -19,42 +19,9 @@ class PomodoroTimer
         $this->remainingTime = $remainingTime;
     }
 
-    public function start(): void
-    {
-        $this->isRunning = true;
-    }
-
-    public function pause(): void
-    {
-        $this->isRunning = false;
-    }
-
-    public function reset(): void
-    {
-        $this->remainingTime = $this->strategy->getDuration();
-        $this->isRunning = false;
-    }
-
     public function setStrategy(PomodoroStrategyInterface $strategy): void
     {
         $this->strategy = $strategy;
         $this->remainingTime = $this->strategy->getDuration();
-    }
-
-    public function getRemainingTime(): int
-    {
-        return $this->remainingTime;
-    }
-
-    public function isTimerRunning(): bool
-    {
-        return $this->isRunning;
-    }
-
-    public function tick(): void
-    {
-        if ($this->isRunning && $this->remainingTime > 0) {
-            $this->remainingTime--;
-        }
     }
 }

@@ -33,7 +33,7 @@ class NotificationService
                 'json' => ['content' => $message],
             ]);
         } catch (\Exception $e) {
-            // Gérer l'erreur, par exemple logger l'exception
+            // Gérer l'erreur
         }
     }
 }

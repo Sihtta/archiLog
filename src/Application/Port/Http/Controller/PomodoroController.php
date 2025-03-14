@@ -22,19 +22,6 @@ class PomodoroController extends AbstractController
         $this->strategies = $strategies;
     }
 
-    // Route pour afficher le timer
-    #[Route('/pomodoro', name: 'pomodoro_index')]
-    public function index(): Response
-    {
-        $remainingTime = $this->pomodoroService->getRemainingTime();
-        $isRunning = $this->pomodoroService->isRunning();
-
-        return $this->render('pages/pomodoro/index.html.twig', [
-            'remainingTime' => $remainingTime,
-            'isRunning' => $isRunning,
-        ]);
-    }
-
     /**
      * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
      */
