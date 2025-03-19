@@ -1,187 +1,163 @@
-UserController:
+UserRepositoryTest:
 <?php
 
-namespace App\Application\Port\Http\Controller;
+namespace Tests\Domain\User;
 
 use App\Domain\User\Entity\User;
-use App\Domain\User\Entity\UsernameHistory;
-use App\Form\UserPasswordType;
-use App\Form\UserType;
+use App\Domain\User\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class UserController extends AbstractController
+class UserRepositoryTest extends KernelTestCase
 {
-    #[Route('/utilisateur/edition/{id}', name: 'user.edit', methods: ['GET', 'POST'])]
-    public function edit(User $choosenUser, Request $request, EntityManagerInterface $manager): Response
-    {
-        if (!$this->isGranted('ROLE_USER') || $this->getUser() !== $choosenUser) {
-            return $this->redirectToRoute('access_denied');
-        }
-
-        $oldPseudo = $choosenUser->getPseudo();
-        $form = $this->createForm(UserType::class, $choosenUser);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $newPseudo = $form->getData()->getPseudo();
-
-            if ($oldPseudo !== $newPseudo) {
-                $usernameHistory = new UsernameHistory();
-                $usernameHistory->setUser($choosenUser)
-                    ->setOldPseudo($oldPseudo)
-                    ->setNewPseudo($newPseudo)
-                    ->setChangedAt(new \DateTimeImmutable());
-
-                $manager->persist($usernameHistory);
-                $manager->flush();
-            }
-
-            $choosenUser->setPseudo($newPseudo);
-            $manager->persist($choosenUser);
-            $manager->flush();
-
-            $this->addFlash('success_edit_profile', 'Les informations de votre compte ont bien été modifiées.');
-
-            return $this->redirectToRoute('user.edit', ['id' => $choosenUser->getId()]);
-        }
-
-        return $this->render('pages/user/edit.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route('/utilisateur/edition-mot-de-passe/{id}', 'user.edit.password', methods: ['GET', 'POST'])]
-    public function editPassword(User $choosenUser, Request $request, EntityManagerInterface $manager, UserPasswordHasherInterface $hasher): Response
-    {
-        if (!$this->isGranted('ROLE_USER') || $this->getUser() !== $choosenUser) {
-            return $this->redirectToRoute('access_denied');
-        }
-
-        $form = $this->createForm(UserPasswordType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($hasher->isPasswordValid($choosenUser, $form->getData()['plainPassword'])) {
-                $choosenUser->setPassword(
-                    $hasher->hashPassword($choosenUser, $form->getData()['newPassword'])
-                );
-
-                $this->addFlash('success_password_change', 'Votre mot de passe a été mis à jour avec succès.');
-
-                $manager->persist($choosenUser);
-                $manager->flush();
-
-                return $this->redirectToRoute('user.edit.password', ['id' => $choosenUser->getId()]);
-            } else {
-                $this->addFlash('warning_password_mismatch', 'Les mots de passe ne correspondent pas.');
-            }
-        }
-
-        return $this->render('pages/user/edit_password.html.twig', [
-            'form' => $form->createView()
-        ]);
-    }
-
-    #[Route("/access-denied", name: "access_denied")]
-    public function accessDenied(): Response
-    {
-        return $this->render('pages/accessDenied.html.twig');
-    }
-}
-UserControllerTest:
-<?php
-
-namespace Tests\Application\Controller;
-
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use App\Domain\User\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
-class UserControllerTest extends WebTestCase
-{
-    private $client;
-    private $entityManager;
-    private $userPasswordHasher;
+    private EntityManagerInterface $entityManager;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
-        parent::setUp();
-        self::ensureKernelShutdown();
-        $this->client = static::createClient();
-        
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-        $this->userPasswordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
-        
-        // Nettoyer et charger les données de test
-        $this->entityManager->getConnection()->executeQuery('DELETE FROM user');
-    }
+        self::bootKernel();
+        $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $this->userRepository = $this->entityManager->getRepository(User::class);
 
-    public function testEditUserAccessDenied()
-    {
-        $user = $this->createUser('testUser');
-        $this->client->request('GET', '/utilisateur/edition/' . $user->getId());
-        $this->assertResponseRedirects('/access-denied');
-    }
+        // Nettoyer la base et insérer des données de test
+        $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
 
-    public function testEditUserSuccessful()
-    {
-        $user = $this->createUser('oldPseudo');
+        $user1 = (new User())
+            ->setEmail('test1@example.com')
+            ->setFullName('User One') // Ajout de fullName
+            ->setExp(100)
+            ->setPassword('hashed_password1');
 
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/utilisateur/edition/' . $user->getId());
+        $user2 = (new User())
+            ->setEmail('test2@example.com')
+            ->setFullName('User Two') // Ajout de fullName
+            ->setExp(200)
+            ->setPassword('hashed_password2');
 
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('form');
+        $user3 = (new User())
+            ->setEmail('test3@example.com')
+            ->setFullName('User Three') // Ajout de fullName
+            ->setExp(50)
+            ->setPassword('hashed_password3');
 
-        $this->client->submitForm('Modifier', [
-            'user[pseudo]' => 'newPseudo'
-        ]);
-
-        $this->assertResponseRedirects('/utilisateur/edition/' . $user->getId());
-
-        $updatedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
-        $this->assertEquals('newPseudo', $updatedUser->getPseudo());
-    }
-
-    public function testEditPasswordSuccessful()
-    {
-        $user = $this->createUser('testUser', 'oldPassword');
-
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/utilisateur/edition-mot-de-passe/' . $user->getId());
-
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('form');
-
-        $this->client->submitForm('Modifier', [
-            'user_password[current_password]' => 'oldPassword', // Nom du champ correct
-            'user_password[new_password][first]' => 'newSecurePassword',
-            'user_password[new_password][second]' => 'newSecurePassword',
-        ]);
-
-        $this->assertResponseRedirects('/utilisateur/edition-mot-de-passe/' . $user->getId());
-
-        $updatedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
-        $this->assertTrue($this->userPasswordHasher->isPasswordValid($updatedUser, 'newSecurePassword'));
-    }
-
-    private function createUser(string $pseudo, string $password = 'password'): User
-    {
-        $user = new User();
-        $user->setEmail($pseudo . '@example.com'); // Ajoute un email valide
-        $user->setFullName('Test User'); // Évite d'avoir un champ nul si nécessaire
-        $user->setPseudo($pseudo);
-        $user->setPassword($this->userPasswordHasher->hashPassword($user, $password));
-
-        $this->entityManager->persist($user);
+        $this->entityManager->persist($user1);
+        $this->entityManager->persist($user2);
+        $this->entityManager->persist($user3);
         $this->entityManager->flush();
-
-        return $user;
     }
+
+    public function testFindOneByEmail(): void
+    {
+        $user = $this->userRepository->findOneByEmail('test1@example.com');
+        $this->assertNotNull($user);
+        $this->assertEquals('test1@example.com', $user->getEmail());
+    }
+
+    public function testFindTopUsersByExp(): void
+    {
+        $users = $this->userRepository->findTopUsersByExp(2);
+
+        $this->assertCount(2, $users);
+        $this->assertEquals(200, $users[0]->getExp()); // Le plus expérimenté en premier
+        $this->assertEquals(100, $users[1]->getExp());
+    }
+
+    public function testUpgradePassword(): void
+    {
+        $user = $this->userRepository->findOneByEmail('test1@example.com');
+        $this->assertNotNull($user);
+
+        $newHashedPassword = 'new_hashed_password';
+        $this->userRepository->upgradePassword($user, $newHashedPassword);
+
+        $updatedUser = $this->userRepository->findOneByEmail('test1@example.com');
+        $this->assertEquals($newHashedPassword, $updatedUser->getPassword());
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->entityManager->close();
+    }
+}
+UsernameHistoryRepositoryTest:
+<?php
+
+namespace Tests\Domain\User;
+
+use App\Domain\User\Entity\UsernameHistory;
+use App\Domain\User\Repository\UsernameHistoryRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\TestCase;
+
+class UsernameHistoryRepositoryTest extends TestCase
+{
+    private UsernameHistoryRepository $usernameHistoryRepository;
+
+    protected function setUp(): void
+    {
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $this->usernameHistoryRepository = new UsernameHistoryRepository($managerRegistry);
+    }
+
+    public function testFindAll(): void
+    {
+        $history = $this->usernameHistoryRepository->findAll();
+        $this->assertIsArray($history);
+    }
+
+    public function testFindOneBy(): void
+    {
+        $history = $this->usernameHistoryRepository->findOneBy(['id' => 1]);
+        $this->assertNull($history); // Par défaut, il n'y a pas de données en base
+    }
+}
+UsernameHistoryRepository:<?php
+
+namespace App\Domain\User\Repository;
+
+use App\Domain\User\Entity\UsernameHistory;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<UsernameHistory>
+ *
+ * @method UsernameHistory|null find($id, $lockMode = null, $lockVersion = null)
+ * @method UsernameHistory|null findOneBy(array $criteria, array $orderBy = null)
+ * @method UsernameHistory[]    findAll()
+ * @method UsernameHistory[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class UsernameHistoryRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, UsernameHistory::class);
+    }
+
+    //    /**
+    //     * @return UsernameHistory[] Returns an array of UsernameHistory objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('u')
+    //            ->andWhere('u.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('u.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?UsernameHistory
+    //    {
+    //        return $this->createQueryBuilder('u')
+    //            ->andWhere('u.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
