@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Persistence\Doctrine;
+namespace App\Domain\Task\Repository;
 
 use App\Application\Port\Repository\TaskRepositoryInterface;
 use App\Domain\Task\Entity\Task;

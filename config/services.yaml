@@ -19,7 +19,7 @@ services:
       - "../src/Kernel.php"
 
   # Explicit service definition for TaskRepository
-  App\Infrastructure\Persistence\Doctrine\TaskRepository:
+  App\Domain\Task\Repository\TaskRepository:
     arguments:
       $registry: "@doctrine"
 
