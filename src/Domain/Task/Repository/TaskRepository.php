@@ -35,16 +35,18 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
     }
 
     public function save(Task $task): void
-    {
-        $this->_em->persist($task);
-        $this->_em->flush();
-    }
+{
+    $em = $this->getEntityManager();
+    $em->persist($task);
+    $em->flush();
+}
 
-    public function delete(Task $task): void
-    {
-        $this->_em->remove($task);
-        $this->_em->flush();
-    }
+public function delete(Task $task): void
+{
+    $em = $this->getEntityManager();
+    $em->remove($task);
+    $em->flush();
+}
 
     public function findTasksWithUpcomingDeadlines(): array
     {

@@ -4,82 +4,91 @@ namespace Tests\Domain\Task;
 
 use App\Domain\Task\Repository\TaskRepository;
 use App\Domain\Task\Entity\Task;
-use Doctrine\ORM\EntityManager;
+use App\Domain\User\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
-use Doctrine\ORM\ORMSetup;
-use Doctrine\ORM\Tools\SchemaTool;
-use PHPUnit\Framework\TestCase;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class TaskRepositoryTest extends TestCase
+class TaskRepositoryTest extends KernelTestCase
 {
     private EntityManagerInterface $entityManager;
     private TaskRepository $taskRepository;
 
     protected function setUp(): void
 {
-    $config = ORMSetup::createConfiguration(true);
-    $config->setMetadataDriverImpl(new AttributeDriver([__DIR__ . '/../../../src/Domain/Task/Entity']));
+    self::bootKernel();
+    $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
+    $this->taskRepository = self::getContainer()->get(TaskRepository::class);
 
-    $connectionParams = ['url' => 'sqlite:///:memory:'];
-    $connection = DriverManager::getConnection($connectionParams, $config);
-    $this->entityManager = new EntityManager($connection, $config);
+    // Nettoyage des tables
+    $this->entityManager->createQuery('DELETE FROM App\Domain\Task\Entity\Task')->execute();
+    $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
 
-    // Mock de ManagerRegistry
-    /** @var ManagerRegistry&MockObject $registryMock */
-    $registryMock = $this->createMock(ManagerRegistry::class);
-    $registryMock->method('getManagerForClass')->willReturn($this->entityManager);
+    // Création d'un utilisateur de test
+    $user = new User();
+    $user->setEmail('test@example.com');
+    $user->setFullName('Test User');
+    $user->setExp(100);
+    $user->setPassword('hashed_password');
+    
+    $this->entityManager->persist($user);
+    $this->entityManager->flush();
 
-    // Correction : on passe maintenant le registryMock
-    $this->taskRepository = new TaskRepository($registryMock);
+    // Création de tâches avec un utilisateur
+    $task1 = (new Task())
+        ->setTitle('Task 1')
+        ->setStatus(Task::STATUS_TODO)
+        ->setUser($user);  // 🔥 Associer l'utilisateur
+
+    $task2 = (new Task())
+        ->setTitle('Task 2')
+        ->setStatus(Task::STATUS_IN_PROGRESS)
+        ->setUser($user);  // 🔥 Associer l'utilisateur
+
+    $this->entityManager->persist($task1);
+    $this->entityManager->persist($task2);
+    $this->entityManager->flush();
 }
 
+public function testSaveTask(): void
+{
+    // Récupération de l'utilisateur créé dans setUp()
+    $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => 'test@example.com']);
 
-    public function testSaveTask(): void
-    {
-        $task = new Task();
-        $task->setTitle('Test Task');
-        $task->setStatus('pending');
+    $task = new Task();
+    $task->setTitle('Test Task');
+    $task->setStatus(Task::STATUS_DONE);
+    $task->setUser($user);  // 🔥 Associer l'utilisateur
 
-        $this->taskRepository->save($task);
-        $this->entityManager->clear();
+    $this->taskRepository->save($task);
+    $this->entityManager->clear();
 
-        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'Test Task']);
-        $this->assertNotNull($retrievedTask);
-        $this->assertEquals('pending', $retrievedTask->getStatus());
-    }
+    $retrievedTask = $this->taskRepository->findOneBy(['title' => 'Test Task']);
+    $this->assertNotNull($retrievedTask);
+    $this->assertEquals(Task::STATUS_DONE, $retrievedTask->getStatus());
+}
 
     public function testFindByStatus(): void
     {
-        $task1 = new Task();
-        $task1->setTitle('Task 1');
-        $task1->setStatus('completed');
-        $this->taskRepository->save($task1);
-
-        $task2 = new Task();
-        $task2->setTitle('Task 2');
-        $task2->setStatus('completed');
-        $this->taskRepository->save($task2);
-
-        $this->entityManager->clear();
-
-        $tasks = $this->taskRepository->findByStatus('completed');
-        $this->assertCount(2, $tasks);
+        $tasks = $this->taskRepository->findByStatus(Task::STATUS_TODO);
+        $this->assertCount(1, $tasks);
+        $this->assertEquals('Task 1', $tasks[0]->getTitle());
     }
 
     public function testDeleteTask(): void
     {
-        $task = new Task();
-        $task->setTitle('To be deleted');
-        $this->taskRepository->save($task);
+        $task = $this->taskRepository->findOneBy(['title' => 'Task 1']);
+        $this->assertNotNull($task);
 
         $this->taskRepository->delete($task);
         $this->entityManager->clear();
 
-        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'To be deleted']);
+        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'Task 1']);
         $this->assertNull($retrievedTask);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->entityManager->close();
     }
 }
