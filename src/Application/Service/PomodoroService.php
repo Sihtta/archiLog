@@ -22,14 +22,6 @@ class PomodoroService
         $this->requestStack = $requestStack;
     }
 
-    // Applique une nouvelle stratégie
-    public function setStrategy(PomodoroStrategyInterface $strategy): void
-    {
-        $this->strategy = $strategy;
-        $this->remainingTime = $this->strategy->getDuration();
-        $this->isRunning = false;  // Assure que le timer est mis en pause
-    }
-
     // Obtient le temps restant
     public function getRemainingTime(): int
     {

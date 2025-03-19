@@ -1,146 +1,89 @@
-TaskRepository.php:
+PomodoroController:
 <?php
 
-namespace App\Domain\Task\Repository;
+// src/Application/Port/Http/Controller/PomodoroController.php
 
-use App\Application\Port\Repository\TaskRepositoryInterface;
-use App\Domain\Task\Entity\Task;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+namespace App\Application\Port\Http\Controller;
 
-class TaskRepository extends ServiceEntityRepository implements TaskRepositoryInterface
+use App\Application\Service\PomodoroService;
+use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class PomodoroController extends AbstractController
 {
-    public function __construct(ManagerRegistry $registry)
+    private $pomodoroService;
+    private $strategies;
+
+    // Injection des stratégies Pomodoro et du service
+    public function __construct(PomodoroService $pomodoroService, array $strategies)
     {
-        parent::__construct($registry, Task::class);
+        $this->pomodoroService = $pomodoroService;
+        $this->strategies = $strategies;
     }
 
-    public function findByUser(int $userId): array
+    #[Route('/pomodoro', name: 'pomodoro_index')]
+    public function index(): Response
     {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.user = :user')
-            ->setParameter('user', $userId)
-            ->orderBy('t.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        return $this->render('pages/pomodoro/index.html.twig', [
+            'remainingTime' => $this->pomodoroService->getRemainingTime(),
+            'isRunning' => $this->pomodoroService->isRunning(),
+        ]);
     }
 
-    public function findByStatus(string $status): array
-    {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.status = :status')
-            ->setParameter('status', $status)
-            ->orderBy('t.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
 
-    public function save(Task $task): void
+    /**
+     * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
+     */
+    public function changeStrategy(string $duration): Response
     {
-        $this->_em->persist($task);
-        $this->_em->flush();
-    }
+        // Vérifie si la stratégie existe
+        if (!isset($this->strategies[$duration])) {
+            throw new \InvalidArgumentException('Invalid strategy name.');
+        }
 
-    public function delete(Task $task): void
-    {
-        $this->_em->remove($task);
-        $this->_em->flush();
-    }
+        $strategy = $this->strategies[$duration];
+        $durationInSeconds = $strategy->getDuration();
 
-    public function findTasksWithUpcomingDeadlines(): array
-    {
-        $qb = $this->createQueryBuilder('t')
-            ->where('t.dueDate IS NOT NULL')
-            ->andWhere('t.dueDate BETWEEN :now AND :soon')
-            ->setParameter('now', new \DateTime())
-            ->setParameter('soon', (new \DateTime())->modify('+1 day'))
-            ->getQuery();
-
-        return $qb->getResult();
+        // Met à jour le timer avec la nouvelle durée
+        return $this->render('pages/pomodoro/index.html.twig', [
+            'remainingTime' => $durationInSeconds,
+            'isRunning' => false, // Timer est en pause par défaut
+        ]);
     }
 }
-TaskRepositoryTest:
+PomodoroControllerTest.php:
 <?php
 
-namespace Tests\Domain\Task;
+namespace Tests\Application\Controller;
 
-use App\Domain\Task\Repository\TaskRepository;
-use App\Domain\Task\Entity\Task;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
-use Doctrine\ORM\ORMSetup;
-use Doctrine\ORM\Tools\SchemaTool;
-use PHPUnit\Framework\TestCase;
-use Doctrine\DBAL\DriverManager;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class TaskRepositoryTest extends TestCase
+class PomodoroControllerTest extends WebTestCase
 {
-    private EntityManagerInterface $entityManager;
-    private TaskRepository $taskRepository;
-
-    protected function setUp(): void
+    public function testIndex(): void
     {
-        // Configuration ORM pour Doctrine 3.3
-        $config = ORMSetup::createConfiguration(true);
-        $config->setMetadataDriverImpl(new AttributeDriver([__DIR__ . '/../../../src/Domain/Task/Entity']));
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/pomodoro');
 
-        $connection = ['driver' => 'pdo_sqlite', 'memory' => true];
-
-        $connectionParams = ['url' => 'sqlite:///:memory:'];
-        $connection = DriverManager::getConnection($connectionParams, $config);
-        $this->entityManager = new EntityManager($connection, $config);
-
-        // Création du schéma en mémoire
-        $schemaTool = new SchemaTool($this->entityManager);
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        $schemaTool->updateSchema($metadata);
-
-        $this->taskRepository = new TaskRepository($this->entityManager);
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('html'); // Vérifie que la page se charge bien
     }
 
-    public function testSaveTask(): void
+    public function testChangeStrategyWithValidDuration(): void
     {
-        $task = new Task();
-        $task->setTitle('Test Task');
-        $task->setStatus('pending');
+        $client = static::createClient();
+        $client->request('GET', '/pomodoro/strategy/25');
 
-        $this->taskRepository->save($task);
-        $this->entityManager->clear();
-
-        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'Test Task']);
-        $this->assertNotNull($retrievedTask);
-        $this->assertEquals('pending', $retrievedTask->getStatus());
+        $this->assertResponseIsSuccessful();
     }
 
-    public function testFindByStatus(): void
+    public function testChangeStrategyWithInvalidDuration(): void
     {
-        $task1 = new Task();
-        $task1->setTitle('Task 1');
-        $task1->setStatus('completed');
-        $this->taskRepository->save($task1);
+        $client = static::createClient();
+        $client->request('GET', '/pomodoro/strategy/invalid');
 
-        $task2 = new Task();
-        $task2->setTitle('Task 2');
-        $task2->setStatus('completed');
-        $this->taskRepository->save($task2);
-
-        $this->entityManager->clear();
-
-        $tasks = $this->taskRepository->findByStatus('completed');
-        $this->assertCount(2, $tasks);
-    }
-
-    public function testDeleteTask(): void
-    {
-        $task = new Task();
-        $task->setTitle('To be deleted');
-        $this->taskRepository->save($task);
-
-        $this->taskRepository->delete($task);
-        $this->entityManager->clear();
-
-        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'To be deleted']);
-        $this->assertNull($retrievedTask);
+        $this->assertResponseStatusCodeSame(500); // Une exception doit être levée
     }
 }
