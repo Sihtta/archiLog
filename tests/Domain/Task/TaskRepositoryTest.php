@@ -11,6 +11,8 @@ use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use PHPUnit\Framework\TestCase;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class TaskRepositoryTest extends TestCase
 {
@@ -18,24 +20,23 @@ class TaskRepositoryTest extends TestCase
     private TaskRepository $taskRepository;
 
     protected function setUp(): void
-    {
-        // Configuration ORM pour Doctrine 3.3
-        $config = ORMSetup::createConfiguration(true);
-        $config->setMetadataDriverImpl(new AttributeDriver([__DIR__ . '/../../../src/Domain/Task/Entity']));
+{
+    $config = ORMSetup::createConfiguration(true);
+    $config->setMetadataDriverImpl(new AttributeDriver([__DIR__ . '/../../../src/Domain/Task/Entity']));
 
-        $connection = ['driver' => 'pdo_sqlite', 'memory' => true];
+    $connectionParams = ['url' => 'sqlite:///:memory:'];
+    $connection = DriverManager::getConnection($connectionParams, $config);
+    $this->entityManager = new EntityManager($connection, $config);
 
-        $connectionParams = ['url' => 'sqlite:///:memory:'];
-        $connection = DriverManager::getConnection($connectionParams, $config);
-        $this->entityManager = new EntityManager($connection, $config);
+    // Mock de ManagerRegistry
+    /** @var ManagerRegistry&MockObject $registryMock */
+    $registryMock = $this->createMock(ManagerRegistry::class);
+    $registryMock->method('getManagerForClass')->willReturn($this->entityManager);
 
-        // Création du schéma en mémoire
-        $schemaTool = new SchemaTool($this->entityManager);
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        $schemaTool->updateSchema($metadata);
+    // Correction : on passe maintenant le registryMock
+    $this->taskRepository = new TaskRepository($registryMock);
+}
 
-        $this->taskRepository = new TaskRepository($this->entityManager);
-    }
 
     public function testSaveTask(): void
     {

@@ -1,0 +1,146 @@
+TaskRepository.php:
+<?php
+
+namespace App\Domain\Task\Repository;
+
+use App\Application\Port\Repository\TaskRepositoryInterface;
+use App\Domain\Task\Entity\Task;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+class TaskRepository extends ServiceEntityRepository implements TaskRepositoryInterface
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Task::class);
+    }
+
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.user = :user')
+            ->setParameter('user', $userId)
+            ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByStatus(string $status): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.status = :status')
+            ->setParameter('status', $status)
+            ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function save(Task $task): void
+    {
+        $this->_em->persist($task);
+        $this->_em->flush();
+    }
+
+    public function delete(Task $task): void
+    {
+        $this->_em->remove($task);
+        $this->_em->flush();
+    }
+
+    public function findTasksWithUpcomingDeadlines(): array
+    {
+        $qb = $this->createQueryBuilder('t')
+            ->where('t.dueDate IS NOT NULL')
+            ->andWhere('t.dueDate BETWEEN :now AND :soon')
+            ->setParameter('now', new \DateTime())
+            ->setParameter('soon', (new \DateTime())->modify('+1 day'))
+            ->getQuery();
+
+        return $qb->getResult();
+    }
+}
+TaskRepositoryTest:
+<?php
+
+namespace Tests\Domain\Task;
+
+use App\Domain\Task\Repository\TaskRepository;
+use App\Domain\Task\Entity\Task;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
+use Doctrine\ORM\ORMSetup;
+use Doctrine\ORM\Tools\SchemaTool;
+use PHPUnit\Framework\TestCase;
+use Doctrine\DBAL\DriverManager;
+
+class TaskRepositoryTest extends TestCase
+{
+    private EntityManagerInterface $entityManager;
+    private TaskRepository $taskRepository;
+
+    protected function setUp(): void
+    {
+        // Configuration ORM pour Doctrine 3.3
+        $config = ORMSetup::createConfiguration(true);
+        $config->setMetadataDriverImpl(new AttributeDriver([__DIR__ . '/../../../src/Domain/Task/Entity']));
+
+        $connection = ['driver' => 'pdo_sqlite', 'memory' => true];
+
+        $connectionParams = ['url' => 'sqlite:///:memory:'];
+        $connection = DriverManager::getConnection($connectionParams, $config);
+        $this->entityManager = new EntityManager($connection, $config);
+
+        // Création du schéma en mémoire
+        $schemaTool = new SchemaTool($this->entityManager);
+        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool->updateSchema($metadata);
+
+        $this->taskRepository = new TaskRepository($this->entityManager);
+    }
+
+    public function testSaveTask(): void
+    {
+        $task = new Task();
+        $task->setTitle('Test Task');
+        $task->setStatus('pending');
+
+        $this->taskRepository->save($task);
+        $this->entityManager->clear();
+
+        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'Test Task']);
+        $this->assertNotNull($retrievedTask);
+        $this->assertEquals('pending', $retrievedTask->getStatus());
+    }
+
+    public function testFindByStatus(): void
+    {
+        $task1 = new Task();
+        $task1->setTitle('Task 1');
+        $task1->setStatus('completed');
+        $this->taskRepository->save($task1);
+
+        $task2 = new Task();
+        $task2->setTitle('Task 2');
+        $task2->setStatus('completed');
+        $this->taskRepository->save($task2);
+
+        $this->entityManager->clear();
+
+        $tasks = $this->taskRepository->findByStatus('completed');
+        $this->assertCount(2, $tasks);
+    }
+
+    public function testDeleteTask(): void
+    {
+        $task = new Task();
+        $task->setTitle('To be deleted');
+        $this->taskRepository->save($task);
+
+        $this->taskRepository->delete($task);
+        $this->entityManager->clear();
+
+        $retrievedTask = $this->taskRepository->findOneBy(['title' => 'To be deleted']);
+        $this->assertNull($retrievedTask);
+    }
+}
