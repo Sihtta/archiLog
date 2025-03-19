@@ -1,89 +1,44 @@
-PomodoroController:
-<?php
+LongPomodoroStrategy:<?php
 
-// src/Application/Port/Http/Controller/PomodoroController.php
+namespace App\Application\Service\Pomodoro\Strategy;
 
-namespace App\Application\Port\Http\Controller;
-
-use App\Application\Service\PomodoroService;
-use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-
-class PomodoroController extends AbstractController
+class LongPomodoroStrategy implements PomodoroStrategyInterface
 {
-    private $pomodoroService;
-    private $strategies;
-
-    // Injection des stratégies Pomodoro et du service
-    public function __construct(PomodoroService $pomodoroService, array $strategies)
+    public function getDuration(): int
     {
-        $this->pomodoroService = $pomodoroService;
-        $this->strategies = $strategies;
-    }
-
-    #[Route('/pomodoro', name: 'pomodoro_index')]
-    public function index(): Response
-    {
-        return $this->render('pages/pomodoro/index.html.twig', [
-            'remainingTime' => $this->pomodoroService->getRemainingTime(),
-            'isRunning' => $this->pomodoroService->isRunning(),
-        ]);
-    }
-
-
-    /**
-     * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
-     */
-    public function changeStrategy(string $duration): Response
-    {
-        // Vérifie si la stratégie existe
-        if (!isset($this->strategies[$duration])) {
-            throw new \InvalidArgumentException('Invalid strategy name.');
-        }
-
-        $strategy = $this->strategies[$duration];
-        $durationInSeconds = $strategy->getDuration();
-
-        // Met à jour le timer avec la nouvelle durée
-        return $this->render('pages/pomodoro/index.html.twig', [
-            'remainingTime' => $durationInSeconds,
-            'isRunning' => false, // Timer est en pause par défaut
-        ]);
+        return 45 * 60;
     }
 }
-PomodoroControllerTest.php:
+PomodoroStrategyInterface:
 <?php
 
-namespace Tests\Application\Controller;
+namespace App\Application\Service\Pomodoro\Strategy;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-class PomodoroControllerTest extends WebTestCase
+interface PomodoroStrategyInterface
 {
-    public function testIndex(): void
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/pomodoro');
+    public function getDuration(): int;
+}
+ShortPomodoroStrategy:
+<?php
 
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('html'); // Vérifie que la page se charge bien
+namespace App\Application\Service\Pomodoro\Strategy;
+
+class ShortPomodoroStrategy implements PomodoroStrategyInterface
+{
+    public function getDuration(): int
+    {
+        return 15 * 60;
     }
+}
+StandardPomodoroStrategy:
+<?php
 
-    public function testChangeStrategyWithValidDuration(): void
+namespace App\Application\Service\Pomodoro\Strategy;
+
+class StandardPomodoroStrategy implements PomodoroStrategyInterface
+{
+    public function getDuration(): int
     {
-        $client = static::createClient();
-        $client->request('GET', '/pomodoro/strategy/25');
-
-        $this->assertResponseIsSuccessful();
-    }
-
-    public function testChangeStrategyWithInvalidDuration(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/pomodoro/strategy/invalid');
-
-        $this->assertResponseStatusCodeSame(500); // Une exception doit être levée
+        return 25 * 60;
     }
 }
