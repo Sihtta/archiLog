@@ -47,7 +47,7 @@ services:
         "long": '@App\Application\Service\Pomodoro\Strategy\LongPomodoroStrategy'
     tags: ["controller.service_arguments"]
 
-  App\Infrastructure\Notification\Observer\DiscordNotifier:
+  App\Domain\Notification\Observer\DiscordNotifier:
     arguments:
       $webhookUrl: "%env(DISCORD_WEBHOOK_URL)%"
       $httpClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'

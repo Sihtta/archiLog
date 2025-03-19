@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Notification\Observer;
+namespace App\Domain\Notification\Observer;
 
 use App\Domain\Notification\Observer\NotificationObserverInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
