@@ -22,6 +22,16 @@ class PomodoroController extends AbstractController
         $this->strategies = $strategies;
     }
 
+    #[Route('/pomodoro', name: 'pomodoro_index')]
+    public function index(): Response
+    {
+        return $this->render('pages/pomodoro/index.html.twig', [
+            'remainingTime' => $this->pomodoroService->getRemainingTime(),
+            'isRunning' => $this->pomodoroService->isRunning(),
+        ]);
+    }
+
+
     /**
      * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
      */
