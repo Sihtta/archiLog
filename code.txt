@@ -1,119 +1,5 @@
-UserRepositoryTest:
+UsernameHistoryRepository:
 <?php
-
-namespace Tests\Domain\User;
-
-use App\Domain\User\Entity\User;
-use App\Domain\User\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-
-class UserRepositoryTest extends KernelTestCase
-{
-    private EntityManagerInterface $entityManager;
-    private UserRepository $userRepository;
-
-    protected function setUp(): void
-    {
-        self::bootKernel();
-        $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $this->userRepository = $this->entityManager->getRepository(User::class);
-
-        // Nettoyer la base et insérer des données de test
-        $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
-
-        $user1 = (new User())
-            ->setEmail('test1@example.com')
-            ->setFullName('User One') // Ajout de fullName
-            ->setExp(100)
-            ->setPassword('hashed_password1');
-
-        $user2 = (new User())
-            ->setEmail('test2@example.com')
-            ->setFullName('User Two') // Ajout de fullName
-            ->setExp(200)
-            ->setPassword('hashed_password2');
-
-        $user3 = (new User())
-            ->setEmail('test3@example.com')
-            ->setFullName('User Three') // Ajout de fullName
-            ->setExp(50)
-            ->setPassword('hashed_password3');
-
-        $this->entityManager->persist($user1);
-        $this->entityManager->persist($user2);
-        $this->entityManager->persist($user3);
-        $this->entityManager->flush();
-    }
-
-    public function testFindOneByEmail(): void
-    {
-        $user = $this->userRepository->findOneByEmail('test1@example.com');
-        $this->assertNotNull($user);
-        $this->assertEquals('test1@example.com', $user->getEmail());
-    }
-
-    public function testFindTopUsersByExp(): void
-    {
-        $users = $this->userRepository->findTopUsersByExp(2);
-
-        $this->assertCount(2, $users);
-        $this->assertEquals(200, $users[0]->getExp()); // Le plus expérimenté en premier
-        $this->assertEquals(100, $users[1]->getExp());
-    }
-
-    public function testUpgradePassword(): void
-    {
-        $user = $this->userRepository->findOneByEmail('test1@example.com');
-        $this->assertNotNull($user);
-
-        $newHashedPassword = 'new_hashed_password';
-        $this->userRepository->upgradePassword($user, $newHashedPassword);
-
-        $updatedUser = $this->userRepository->findOneByEmail('test1@example.com');
-        $this->assertEquals($newHashedPassword, $updatedUser->getPassword());
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->entityManager->close();
-    }
-}
-UsernameHistoryRepositoryTest:
-<?php
-
-namespace Tests\Domain\User;
-
-use App\Domain\User\Entity\UsernameHistory;
-use App\Domain\User\Repository\UsernameHistoryRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\TestCase;
-
-class UsernameHistoryRepositoryTest extends TestCase
-{
-    private UsernameHistoryRepository $usernameHistoryRepository;
-
-    protected function setUp(): void
-    {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
-        $this->usernameHistoryRepository = new UsernameHistoryRepository($managerRegistry);
-    }
-
-    public function testFindAll(): void
-    {
-        $history = $this->usernameHistoryRepository->findAll();
-        $this->assertIsArray($history);
-    }
-
-    public function testFindOneBy(): void
-    {
-        $history = $this->usernameHistoryRepository->findOneBy(['id' => 1]);
-        $this->assertNull($history); // Par défaut, il n'y a pas de données en base
-    }
-}
-UsernameHistoryRepository:<?php
 
 namespace App\Domain\User\Repository;
 
@@ -160,4 +46,428 @@ class UsernameHistoryRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+}
+UserRepository:
+<?php
+
+namespace App\Domain\User\Repository;
+
+use App\Domain\User\Entity\User;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+
+/**
+ * @extends ServiceEntityRepository<User>
+ * @implements PasswordUpgraderInterface<User>
+ */
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, User::class);
+    }
+
+    /**
+     * Used to upgrade (rehash) the user's password automatically over time.
+     */
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    {
+        if (!$user instanceof User) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
+        }
+
+        $user->setPassword($newHashedPassword);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * Trouver un utilisateur par email.
+     */
+    public function findOneByEmail(string $email): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.email = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Récupérer les utilisateurs triés par expérience (les plus expérimentés en premier).
+     */
+    public function findTopUsersByExp(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.exp', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+}
+UsernameHistory:
+<?php
+
+namespace App\Domain\User\Entity;
+
+use App\Domain\User\Repository\UsernameHistoryRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: UsernameHistoryRepository::class)]
+class UsernameHistory
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'usernameHistories')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
+
+    #[ORM\Column(length: 255)]
+    private ?string $oldPseudo = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $newPseudo = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $changedAt = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getOldPseudo(): ?string
+    {
+        return $this->oldPseudo;
+    }
+
+    public function setOldPseudo(string $oldPseudo): static
+    {
+        $this->oldPseudo = $oldPseudo;
+
+        return $this;
+    }
+
+    public function getNewPseudo(): ?string
+    {
+        return $this->newPseudo;
+    }
+
+    public function setNewPseudo(string $newPseudo): static
+    {
+        $this->newPseudo = $newPseudo;
+
+        return $this;
+    }
+
+    public function getChangedAt(): ?\DateTimeImmutable
+    {
+        return $this->changedAt;
+    }
+
+    public function setChangedAt(\DateTimeImmutable $changedAt): static
+    {
+        $this->changedAt = $changedAt;
+
+        return $this;
+    }
+}
+User:
+<?php
+
+namespace App\Domain\User\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Domain\User\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Domain\Task\Entity\Task;
+
+#[UniqueEntity('email')]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: '`user`')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Email()]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank()]
+    private ?string $fullName = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $pseudo = null;
+
+    #[ORM\Column]
+    private array $roles = [];
+
+    private ?string $plainPassword = null;
+
+    #[ORM\Column]
+    private ?string $password = 'password';
+
+    #[ORM\Column]
+    #[Assert\NotNull()]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(options: ["default" => 0])]
+    #[Assert\NotNull()]
+    #[Assert\PositiveOrZero()]
+    private int $exp = 0;
+
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private Collection $tasks;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->tasks = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function setFullName(string $fullName): static
+    {
+        $this->fullName = $fullName;
+        return $this;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function setPseudo(?string $pseudo): static
+    {
+        $this->pseudo = $pseudo;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getExp(): int
+    {
+        return $this->exp;
+    }
+
+    public function setExp(int $exp): static
+    {
+        $this->exp = max(0, $exp);
+        return $this;
+    }
+
+    public function addExp(int $points): static
+    {
+        $this->exp += max(0, $points);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function addTask(Task $task): static
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeTask(Task $task): static
+    {
+        if ($this->tasks->removeElement($task)) {
+            if ($task->getUser() === $this) {
+                $task->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getTreeImage(): string
+    {
+        $levels = [100, 200, 300, 400, 500, 600, 700];
+        $imageIndex = 1;
+
+        foreach ($levels as $index => $xpThreshold) {
+            if ($this->exp >= $xpThreshold) {
+                $imageIndex = $index + 2;
+            }
+        }
+
+        return "images/" . min($imageIndex, 7) . ".png";
+    }
+
+    public function getTreeSize(): int
+    {
+        $levels = [100, 200, 300, 400, 500, 600, 700];
+        $sizes = [30, 55, 45, 50, 55, 70, 75];
+
+        $sizeIndex = 0;
+        foreach ($levels as $index => $xpThreshold) {
+            if ($this->exp >= $xpThreshold) {
+                $sizeIndex = $index;
+            }
+        }
+
+        return $sizes[min($sizeIndex, count($sizes) - 1)];
+    }
+
+    public function __toString(): string
+    {
+        return $this->pseudo ?: $this->fullName;
+    }
+}
+UsernameHistoryREpositoryTest:
+<?php
+namespace Tests\Domain\User;
+
+use App\Domain\User\Entity\UsernameHistory;
+use App\Domain\User\Repository\UsernameHistoryRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+class UsernameHistoryRepositoryTest extends KernelTestCase
+{
+    private EntityManagerInterface $entityManager;
+    private UsernameHistoryRepository $usernameHistoryRepository;
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+        $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $this->usernameHistoryRepository = $this->entityManager->getRepository(UsernameHistory::class);
+
+        // Nettoyage et insertion de données de test
+        $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\UsernameHistory')->execute();
+
+        $history1 = (new UsernameHistory())
+            ->setOldUsername('oldUser1')
+            ->setNewUsername('newUser1')
+            ->setChangedAt(new \DateTimeImmutable());
+
+        $this->entityManager->persist($history1);
+        $this->entityManager->flush();
+    }
+
+    public function testFindAll(): void
+    {
+        $history = $this->usernameHistoryRepository->findAll();
+        $this->assertIsArray($history);
+        $this->assertCount(1, $history);
+    }
+
+    public function testFindOneBy(): void
+    {
+        $history = $this->usernameHistoryRepository->findOneBy(['oldUsername' => 'oldUser1']);
+        $this->assertNotNull($history);
+        $this->assertEquals('newUser1', $history->getNewUsername());
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->entityManager->close();
+    }
 }
