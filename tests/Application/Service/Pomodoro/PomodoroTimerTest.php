@@ -16,7 +16,6 @@ class PomodoroTimerTest extends TestCase
         $timer = new PomodoroTimer();
         $this->assertInstanceOf(PomodoroTimer::class, $timer);
 
-        // Vérifie que la durée par défaut est celle du StandardPomodoroStrategy (25 min)
         $strategy = new StandardPomodoroStrategy();
         $this->assertEquals($strategy->getDuration(), $this->getRemainingTime($timer));
     }

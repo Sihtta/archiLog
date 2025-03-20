@@ -27,6 +27,6 @@ class SecurityControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/redirect-after-login');
 
-        $this->assertResponseRedirects('/'); // Vérifie la redirection vers home.index
+        $this->assertResponseRedirects('/');
     }
 }

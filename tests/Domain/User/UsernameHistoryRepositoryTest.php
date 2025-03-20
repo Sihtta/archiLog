@@ -19,7 +19,6 @@ class UsernameHistoryRepositoryTest extends KernelTestCase
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->usernameHistoryRepository = $this->entityManager->getRepository(UsernameHistory::class);
 
-        // Nettoyage des tables avant chaque test
         $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\UsernameHistory')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
     }

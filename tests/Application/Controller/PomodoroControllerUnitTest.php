@@ -21,10 +21,10 @@ class PomodoroControllerUnitTest extends TestCase
         $this->twig = $this->createMock(Environment::class);
 
         $shortStrategy = $this->createMock(PomodoroStrategyInterface::class);
-        $shortStrategy->method('getDuration')->willReturn(900); // 15 min
+        $shortStrategy->method('getDuration')->willReturn(900);
 
         $standardStrategy = $this->createMock(PomodoroStrategyInterface::class);
-        $standardStrategy->method('getDuration')->willReturn(1500); // 25 min
+        $standardStrategy->method('getDuration')->willReturn(1500);
 
         $this->strategies = [
             'short' => $shortStrategy,
@@ -39,7 +39,6 @@ class PomodoroControllerUnitTest extends TestCase
 
         $controller = new PomodoroController($this->pomodoroService, $this->strategies);
 
-        // Simulation correcte de render() qui retourne une string
         $this->twig->method('render')
             ->with('pages/pomodoro/index.html.twig', [
                 'remainingTime' => 1200,

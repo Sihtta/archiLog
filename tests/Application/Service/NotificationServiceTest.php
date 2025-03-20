@@ -42,10 +42,9 @@ class NotificationServiceTest extends TestCase
             ->willThrowException($this->createMock(TransportExceptionInterface::class));
 
         $notificationService = new NotificationService($httpClient, 'https://discord-webhook-url');
-        
-        // Appel de la méthode pour s'assurer qu'aucune exception non gérée ne remonte
+
         $notificationService->sendTaskStatusUpdate('Test message');
         
-        $this->assertTrue(true); // Évite un test vide en cas d'absence d'exception
+        $this->assertTrue(true);
     }
 }

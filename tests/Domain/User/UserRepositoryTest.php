@@ -18,7 +18,6 @@ class UserRepositoryTest extends KernelTestCase
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->userRepository = $this->entityManager->getRepository(User::class);
 
-        // Nettoyage de la table User avant chaque test
         $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
     }
 

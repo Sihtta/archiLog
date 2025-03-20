@@ -32,15 +32,13 @@ class UserControllerTest extends WebTestCase
         $user = $this->createUser();
         $client->loginUser($user);
 
-        // Accéder à la page d'édition de l'utilisateur
         $client->request('GET', '/utilisateur/edition/' . $user->getId());
         $this->assertResponseIsSuccessful();
 
-        // Soumettre le formulaire avec les champs corrects
         $client->submitForm('Modifier mon profil', [
-            'user[pseudo]' => 'UpdatedUser',  // Pseudo facultatif
-            'user[fullName]' => 'Updated Name', // Modifier le nom complet
-            'user[plainPassword]' => 'password',  // Mot de passe
+            'user[pseudo]' => 'UpdatedUser',
+            'user[fullName]' => 'Updated Name',
+            'user[plainPassword]' => 'password',
         ]);
 
         $this->assertResponseRedirects('/utilisateur/edition/' . $user->getId());
@@ -58,14 +56,12 @@ class UserControllerTest extends WebTestCase
         $user = $this->createUser();
         $client->loginUser($user);
 
-        // Accéder à la page de modification du mot de passe
         $client->request('GET', '/utilisateur/edition-mot-de-passe/' . $user->getId());
         $this->assertResponseIsSuccessful();
 
-        // Soumettre le formulaire avec les champs corrects
         $client->submitForm('Modifier mon mot de passe', [
-            'user_password[plainPassword][first]' => 'password', // Premier champ du mot de passe
-            'user_password[plainPassword][second]' => 'newpassword', // Deuxième champ du mot de passe
+            'user_password[plainPassword][first]' => 'password',
+            'user_password[plainPassword][second]' => 'newpassword',
         ]);
 
         $this->assertResponseRedirects('/utilisateur/edition-mot-de-passe/' . $user->getId());
@@ -76,7 +72,6 @@ class UserControllerTest extends WebTestCase
         $client = static::createClient();
         $user = $this->createUser();
 
-        // Essayer d'accéder à la page sans être connecté
         $client->request('GET', '/utilisateur/edition/' . $user->getId());
         $this->assertResponseRedirects('/access-denied');
     }

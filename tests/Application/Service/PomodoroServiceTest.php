@@ -12,7 +12,7 @@ class PomodoroServiceTest extends TestCase
     public function testGetRemainingTimeReturnsInitialDuration()
     {
         $strategy = $this->createMock(PomodoroStrategyInterface::class);
-        $strategy->method('getDuration')->willReturn(25 * 60); // 25 minutes
+        $strategy->method('getDuration')->willReturn(25 * 60);
         
         $requestStack = $this->createMock(RequestStack::class);
         

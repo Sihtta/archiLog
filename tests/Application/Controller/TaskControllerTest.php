@@ -11,7 +11,7 @@ class TaskControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/tasks');
 
-        $this->assertResponseRedirects('/connexion'); // Redirection vers la page de connexion
+        $this->assertResponseRedirects('/connexion');
     }
 
     public function testCreateTaskRequiresAuthentication(): void
@@ -19,7 +19,6 @@ class TaskControllerTest extends WebTestCase
     $client = static::createClient();
     $client->request('GET', '/tasks/new');
 
-    // Vérifie que l'utilisateur est redirigé vers la page de connexion
     $this->assertResponseRedirects('/connexion');
 }
 
@@ -28,6 +27,6 @@ class TaskControllerTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/tasks/1/move/invalid_status');
 
-        $this->assertResponseStatusCodeSame(404); // Statut invalide
+        $this->assertResponseStatusCodeSame(404);
     }
 }

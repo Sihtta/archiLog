@@ -12,6 +12,6 @@ class AccessDeniedControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/accessdenied');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('html'); // Vérifie que la page se charge bien
+        $this->assertSelectorExists('html');
     }
 }

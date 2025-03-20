@@ -19,7 +19,6 @@ class TaskRepositoryTest extends KernelTestCase
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->taskRepository = self::getContainer()->get(TaskRepository::class);
 
-        // Nettoyage des tables avant chaque test
         $this->entityManager->createQuery('DELETE FROM App\Domain\Task\Entity\Task')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Domain\User\Entity\User')->execute();
     }

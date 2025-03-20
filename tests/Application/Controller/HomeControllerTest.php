@@ -12,6 +12,6 @@ class HomeControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('html'); // Vérifie que la page se charge bien
+        $this->assertSelectorExists('html');
     }
 }
