@@ -66,6 +66,7 @@ class UserTest extends TestCase
         $this->assertEquals('images/4.png', $user->getTreeImage());
     }
 
+
     public function testPasswordManagement()
     {
         $user = new User();

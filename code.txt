@@ -1,36 +1,110 @@
-usernamehistory:
+Task:
 <?php
 
-namespace App\Domain\User\Entity;
+namespace App\Domain\Task\Entity;
 
-use App\Domain\User\Repository\UsernameHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Domain\User\Entity\User;
 
-#[ORM\Entity(repositoryClass: UsernameHistoryRepository::class)]
-class UsernameHistory
+#[ORM\Entity]
+class Task
 {
+    public const STATUS_TODO = 'todo';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_DONE = 'done';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'usernameHistories')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
+    #[Assert\Length(min: 3, max: 255)]
+    private ?string $title = null;
+
+    #[ORM\Column(type: "text", nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\Column(type: "datetime_immutable")]
+    #[Assert\NotNull()]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?\DateTime $dueDate = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice([self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])]
+    private ?string $status = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?\DateTime $completedAt = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $oldPseudo = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $newPseudo = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $changedAt = null;
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        if ($this->status === null) {
+            $this->status = self::STATUS_TODO;
+        }
+    }
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getDueDate(): ?\DateTime
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate(?\DateTime $dueDate): static
+    {
+        $this->dueDate = $dueDate;
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
     }
 
     public function getUser(): ?User
@@ -41,70 +115,100 @@ class UsernameHistory
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
-    public function getOldPseudo(): ?string
+    public function isDone(): bool
     {
-        return $this->oldPseudo;
+        return $this->status === self::STATUS_DONE;
     }
 
-    public function setOldPseudo(string $oldPseudo): static
+    public function getCompletedAt(): ?\DateTime
     {
-        $this->oldPseudo = $oldPseudo;
-
-        return $this;
+        return $this->completedAt;
     }
 
-    public function getNewPseudo(): ?string
+    public function setCompletedAt(?\DateTime $completedAt): static
     {
-        return $this->newPseudo;
-    }
-
-    public function setNewPseudo(string $newPseudo): static
-    {
-        $this->newPseudo = $newPseudo;
-
-        return $this;
-    }
-
-    public function getChangedAt(): ?\DateTimeImmutable
-    {
-        return $this->changedAt;
-    }
-
-    public function setChangedAt(\DateTimeImmutable $changedAt): static
-    {
-        $this->changedAt = $changedAt;
-
+        $this->completedAt = $completedAt;
         return $this;
     }
 }
-usernamehistorytest:
+tasktest:
 <?php
 
-namespace Tests\Domain\User;
+namespace Tests\Domain\Task;
 
-use PHPUnit\Framework\TestCase;
-use App\Domain\User\Entity\UsernameHistory;
+use App\Domain\Task\Entity\Task;
 use App\Domain\User\Entity\User;
-use DateTimeImmutable;
+use PHPUnit\Framework\TestCase;
 
-class UsernameHistoryTest extends TestCase
+class TaskTest extends TestCase
 {
-    public function testUsernameHistoryCreation()
+    public function testTaskInitialization(): void
     {
-        $user = $this->createMock(User::class);
-        $history = new UsernameHistory();
-        $history->setUser($user)
-                ->setOldPseudo('OldName')
-                ->setNewPseudo('NewName')
-                ->setChangedAt(new DateTimeImmutable());
+        $task = new Task();
 
-        $this->assertInstanceOf(UsernameHistory::class, $history);
-        $this->assertEquals('OldName', $history->getOldPseudo());
-        $this->assertEquals('NewName', $history->getNewPseudo());
-        $this->assertNotNull($history->getChangedAt());
+        $this->assertNotNull($task->getCreatedAt());
+        $this->assertSame(Task::STATUS_TODO, $task->getStatus());
+    }
+
+    public function testSetTitle(): void
+    {
+        $task = new Task();
+        $task->setTitle('New Task');
+
+        $this->assertSame('New Task', $task->getTitle());
+    }
+
+    public function testSetDescription(): void
+    {
+        $task = new Task();
+        $task->setDescription('This is a test task.');
+
+        $this->assertSame('This is a test task.', $task->getDescription());
+    }
+
+    public function testSetDueDate(): void
+    {
+        $task = new Task();
+        $dueDate = new \DateTime('2025-01-01');
+        $task->setDueDate($dueDate);
+
+        $this->assertSame($dueDate, $task->getDueDate());
+    }
+
+    public function testSetStatus(): void
+    {
+        $task = new Task();
+        $task->setStatus(Task::STATUS_IN_PROGRESS);
+
+        $this->assertSame(Task::STATUS_IN_PROGRESS, $task->getStatus());
+    }
+
+    public function testSetUser(): void
+    {
+        $task = new Task();
+        $user = $this->createMock(User::class);
+        $task->setUser($user);
+
+        $this->assertSame($user, $task->getUser());
+    }
+
+    public function testIsDone(): void
+    {
+        $task = new Task();
+        $task->setStatus(Task::STATUS_DONE);
+
+        $this->assertTrue($task->isDone());
+    }
+
+    public function testSetCompletedAt(): void
+    {
+        $task = new Task();
+        $completedAt = new \DateTime();
+        $task->setCompletedAt($completedAt);
+
+        $this->assertSame($completedAt, $task->getCompletedAt());
     }
 }

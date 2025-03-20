@@ -74,4 +74,44 @@ class TaskTest extends TestCase
 
         $this->assertSame($completedAt, $task->getCompletedAt());
     }
+
+    public function testNewTaskHasDefaultValues(): void
+    {
+        $task = new Task();
+
+        $this->assertNull($task->getId());
+        $this->assertNull($task->getTitle());
+        $this->assertNull($task->getDescription());
+        $this->assertNull($task->getDueDate());
+        $this->assertSame(Task::STATUS_TODO, $task->getStatus());
+        $this->assertNull($task->getUser());
+        $this->assertNull($task->getCompletedAt());
+    }
+
+    public function testTaskCanBeMarkedAsCompleted(): void
+    {
+        $task = new Task();
+        $task->setStatus(Task::STATUS_DONE);
+        $completedAt = new \DateTime();
+        $task->setCompletedAt($completedAt);
+
+        $this->assertTrue($task->isDone());
+        $this->assertSame($completedAt, $task->getCompletedAt());
+    }
+
+    public function testDueDateCanBeNull(): void
+    {
+        $task = new Task();
+        $task->setDueDate(null);
+
+        $this->assertNull($task->getDueDate());
+    }
+
+    public function testCompletedAtCanBeNull(): void
+    {
+        $task = new Task();
+        $task->setCompletedAt(null);
+
+        $this->assertNull($task->getCompletedAt());
+    }
 }
