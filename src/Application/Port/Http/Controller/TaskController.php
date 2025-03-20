@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Domain\User\Entity\User;
 
 class TaskController extends AbstractController
 {
@@ -23,24 +24,48 @@ class TaskController extends AbstractController
     public function index(): Response
     {
         if (!$this->getUser()) {
-            return $this->redirectToRoute('security.login');
+            return $this->redirectToRoute('security_login');
         }
 
         $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur non trouvé.');
+        }
+
         $tasks = $this->taskService->getTasksByUser($user);
+
+        $maxTasksTodo = $user->getMaxTasksTodo();
+        $maxTasksInProgress = $user->getMaxTasksInProgress();
+
+        $currentTasksTodo = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
+        $currentTasksInProgress = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'in_progress')->count();
 
         return $this->render('pages/task/index.html.twig', [
             'tasks' => $tasks,
+            'maxTasksTodo' => $maxTasksTodo,
+            'currentTasksTodo' => $currentTasksTodo,
+            'maxTasksInProgress' => $maxTasksInProgress,
+            'currentTasksInProgress' => $currentTasksInProgress,
         ]);
     }
+
 
     #[Route('/tasks/new', name: 'task_create')]
     public function create(Request $request): Response
     {
         $user = $this->getUser();
 
-        if (!$user) {
+        if (!$user instanceof User) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour créer une tâche.');
+        }
+
+        $currentTasksTodo = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
+        $maxTasksTodo = $user->getMaxTasksTodo();
+
+        if ($currentTasksTodo >= $maxTasksTodo) {
+            $this->addFlash('error', 'Vous avez atteint la limite de tâches "À faire".');
+            return $this->redirectToRoute('task_index');
         }
 
         $task = new Task();
@@ -64,6 +89,7 @@ class TaskController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
 
     #[Route('/tasks/{id}/edit', name: 'task_edit')]
     public function edit(Task $task, Request $request): Response
@@ -98,6 +124,21 @@ class TaskController extends AbstractController
     {
         if (!in_array($status, [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS, Task::STATUS_DONE])) {
             throw $this->createNotFoundException("Statut invalide");
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur non trouvé.');
+        }
+
+        if ($task->getStatus() === Task::STATUS_TODO && $status === Task::STATUS_IN_PROGRESS) {
+            $currentTasksInProgress = $user->getTasks()->filter(fn($t) => $t->getStatus() === Task::STATUS_IN_PROGRESS)->count();
+            $maxTasksInProgress = $user->getMaxTasksInProgress();
+
+            if ($currentTasksInProgress >= $maxTasksInProgress) {
+                $this->addFlash('error', 'Vous avez atteint la limite de tâches "En cours".');
+                return $this->redirectToRoute('task_index');
+            }
         }
 
         $this->taskService->updateTaskStatus($task, $status);

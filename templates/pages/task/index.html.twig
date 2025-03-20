@@ -1,191 +1,211 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Tâches{% endblock %}
+{% block title %}Liste des Tâches
+{% endblock %}
 
 {% block body %}
-<div class="task-header">
-    <h1>Liste des Tâches</h1>
-    <a href="{{ path('task_create') }}" class="btn btn-primary">Créer une tâche</a>
-</div>
+	<div class="task-header">
+		<h1>Liste des Tâches</h1>
+		<a href="{{ path('task_create') }}" class="btn btn-primary">Créer une tâche</a>
+	</div>
 
-<div class="task-container">
-    <div class="task-column">
-        <h2>À faire</h2>
-        {% for task in tasks %}
-            {% if task.status == 'todo' %}
-                <div class="task-card">
-                    <h3>{{ task.title }}</h3>
-                    <p class="task-desc">{{ task.description }}</p>
-                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
-                    <div class="task-actions">
-                        <a href="{{ path('task_move', {id: task.id, status: 'in_progress'}) }}" class="btn btn-info">Commencer</a>
-                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
-						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
+	<!-- Affichage des flash messages (erreurs, succès) -->
+	{% for message in app.flashes('error') %}
+		<div class="alert alert-danger">
+			{{ message }}
+		</div>
+	{% endfor %}
+	{% for message in app.flashes('success') %}
+		<div class="alert alert-success">
+			{{ message }}
+		</div>
+	{% endfor %}
 
-    <div class="task-column">
-        <h2>En cours</h2>
-        {% for task in tasks %}
-            {% if task.status == 'in_progress' %}
-                <div class="task-card">
-                    <h3>{{ task.title }}</h3>
-                    <p class="task-desc">{{ task.description }}</p>
-                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
-                    <div class="task-actions">
-                        <a href="{{ path('task_move', {id: task.id, status: 'done'}) }}" class="btn btn-success">Terminer</a>
-                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
-						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
+	<div class="task-container">
+		<div class="task-column">
+			<h2>À faire</h2>
+			<p>Limite de tâches "À faire" :
+				{{ maxTasksTodo }}</p>
+			{% for task in tasks %}
+				{% if task.status == 'todo' %}
+					<div class="task-card">
+						<h3>{{ task.title }}</h3>
+						<p class="task-desc">{{ task.description }}</p>
+						<p class="task-date">📅
+							{{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+						<div class="task-actions">
+							<a href="{{ path('task_move', {id: task.id, status: 'in_progress'}) }}" class="btn btn-info">Commencer</a>
+							<a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+							<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
 
-    <div class="task-column">
-        <h2>Terminées</h2>
-        {% for task in tasks %}
-            {% if task.status == 'done' %}
-                <div class="task-card task-done">
-                    <h3>{{ task.title }}</h3>
-                    <p class="task-desc">{{ task.description }}</p>
-                    <p class="task-date">📅 {{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
-                    <div class="task-actions">
-                        <a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
-						<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-</div>
+		<div class="task-column">
+			<h2>En cours</h2>
+			<p>Limite de tâches "En cours" :
+				{{ maxTasksInProgress }}</p>
+			<!-- Affichage de la limite "En cours" -->
+			{% for task in tasks %}
+				{% if task.status == 'in_progress' %}
+					<div class="task-card">
+						<h3>{{ task.title }}</h3>
+						<p class="task-desc">{{ task.description }}</p>
+						<p class="task-date">📅
+							{{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+						<div class="task-actions">
+							<a href="{{ path('task_move', {id: task.id, status: 'done'}) }}" class="btn btn-success">Terminer</a>
+							<a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+							<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
 
-<style>
-    .task-container {
-        display: flex;
-        gap: 20px;
-        justify-content: space-around;
-        padding: 20px;
-    }
+		<div class="task-column">
+			<h2>Terminées</h2>
+			{% for task in tasks %}
+				{% if task.status == 'done' %}
+					<div class="task-card task-done">
+						<h3>{{ task.title }}</h3>
+						<p class="task-desc">{{ task.description }}</p>
+						<p class="task-date">📅
+							{{ task.dueDate ? task.dueDate|date('d/m/Y') : 'Pas de date limite' }}</p>
+						<div class="task-actions">
+							<a href="{{ path('task_delete', {id: task.id}) }}" class="btn btn-danger">Supprimer</a>
+							<a href="{{ path('task_edit', {id: task.id}) }}" class="btn btn-warning">Modifier</a>
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
 
-    .task-column {
-        flex: 1;
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-    }
+	<style>
+		.task-container {
+			display: flex;
+			gap: 20px;
+			justify-content: space-around;
+			padding: 20px;
+		}
 
-    .task-column h2 {
-        text-align: center;
-        color: #333;
-    }
+		.task-column {
+			flex: 1;
+			background: #f8f9fa;
+			padding: 15px;
+			border-radius: 10px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		}
 
-    .task-card {
-        background: white;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 8px;
-        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-        border-left: 5px solid #007bff;
-    }
+		.task-column h2 {
+			text-align: center;
+			color: #333;
+		}
 
-    .task-done {
-        border-left: 5px solid #28a745;
-    }
+		.task-card {
+			background: white;
+			padding: 15px;
+			margin: 10px 0;
+			border-radius: 8px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			border-left: 5px solid #007bff;
+		}
 
-    .task-card h3 {
-        margin: 0;
-        font-size: 1.2em;
-    }
+		.task-done {
+			border-left: 5px solid #28a745;
+		}
 
-    .task-desc {
-        font-size: 0.9em;
-        color: #555;
-        margin: 5px 0;
-    }
+		.task-card h3 {
+			margin: 0;
+			font-size: 1.2em;
+		}
 
-    .task-date {
-        font-size: 0.8em;
-        font-weight: bold;
-        color: #333;
-    }
+		.task-desc {
+			font-size: 0.9em;
+			color: #555;
+			margin: 5px 0;
+		}
 
-    /* Boutons */
-    .task-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-    }
+		.task-date {
+			font-size: 0.8em;
+			font-weight: bold;
+			color: #333;
+		}
 
-    .btn {
-        text-decoration: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        font-size: 0.9em;
-        text-align: center;
-        display: inline-block;
-        transition: 0.3s;
-    }
+		.task-actions {
+			display: flex;
+			gap: 10px;
+			margin-top: 10px;
+		}
 
-    .btn-info {
-        background: #17a2b8;
-        color: white;
-        border: none;
-    }
+		.btn {
+			text-decoration: none;
+			padding: 8px 12px;
+			border-radius: 5px;
+			font-size: 0.9em;
+			text-align: center;
+			display: inline-block;
+			transition: 0.3s;
+		}
 
-    .btn-info:hover {
-        background: #138496;
-    }
+		.btn-info {
+			background: #17a2b8;
+			color: white;
+			border: none;
+		}
 
-    .btn-success {
-        background: #28a745;
-        color: white;
-        border: none;
-    }
+		.btn-info:hover {
+			background: #138496;
+		}
 
-    .btn-success:hover {
-        background: #218838;
-    }
+		.btn-success {
+			background: #28a745;
+			color: white;
+			border: none;
+		}
 
-    .btn-danger {
-        background: #dc3545;
-        color: white;
-        border: none;
-    }
+		.btn-success:hover {
+			background: #218838;
+		}
 
-    .btn-danger:hover {
-        background: #c82333;
-    }
-	
-	.task-header {
-		margin-top: 30px;
-		margin-left: auto;
-		margin-right: auto;
-		max-width: 80%;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 20px;
-	}
-</style>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const deleteButtons = document.querySelectorAll(".btn-danger");
+		.btn-danger {
+			background: #dc3545;
+			color: white;
+			border: none;
+		}
 
-        deleteButtons.forEach(button => {
-            button.addEventListener("click", function (event) {
-                event.preventDefault();
+		.btn-danger:hover {
+			background: #c82333;
+		}
 
-                const confirmation = confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?");
-                if (confirmation) {
-                    window.location.href = this.href;
-                }
-            });
-        });
-    });
-</script>
+		.task-header {
+			margin-top: 30px;
+			margin-left: auto;
+			margin-right: auto;
+			max-width: 80%;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px;
+		}
+	</style>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+const deleteButtons = document.querySelectorAll(".btn-danger");
+
+deleteButtons.forEach(button => {
+button.addEventListener("click", function (event) {
+event.preventDefault();
+
+const confirmation = confirm("Êtes-vous sûr de vouloir supprimer cette tâche ?");
+if (confirmation) {
+window.location.href = this.href;
+}
+});
+});
+});
+	</script>
 {% endblock %}

@@ -5,6 +5,7 @@ namespace App\Application\Service;
 use App\Application\Port\Repository\TaskRepositoryInterface;
 use App\Domain\Task\Entity\Task;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Domain\User\Entity\User;
 
 class TaskService
 {
@@ -27,8 +28,19 @@ class TaskService
         $this->observers[] = $this->notificationService;
     }
 
-    public function createTask(string $title, ?string $description, ?\DateTime $dueDate, string $status, $user): Task
+    public function createTask(string $title, ?string $description, ?\DateTime $dueDate, string $status, User $user): Task
     {
+        $tasksTodoCount = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
+        $tasksInProgressCount = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'in_progress')->count();
+
+        if ($tasksTodoCount >= $user->getMaxTasksTodo()) {
+            throw new \Exception('Vous avez atteint la limite de tâches "À faire".');
+        }
+
+        if ($tasksInProgressCount >= $user->getMaxTasksInProgress()) {
+            throw new \Exception('Vous avez atteint la limite de tâches "En cours".');
+        }
+
         $task = new Task();
         $task->setTitle($title);
         $task->setDescription($description);
@@ -53,7 +65,7 @@ class TaskService
         $this->entityManager->flush();
     }
 
-    public function getTasksByUser($user): array
+    public function getTasksByUser(User $user): array
     {
         return $this->taskRepository->findByUser($user->getId());
     }

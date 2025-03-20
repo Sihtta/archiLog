@@ -50,6 +50,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\PositiveOrZero()]
     private int $exp = 0;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 10])]
+    #[Assert\Positive()]
+    private int $maxTasksTodo = 10;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 10])]
+    #[Assert\Positive()]
+    private int $maxTasksInProgress = 10;
+
+
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $tasks;
 
@@ -188,6 +197,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $task->setUser(null);
             }
         }
+        return $this;
+    }
+
+    public function getMaxTasksTodo(): int
+    {
+        return $this->maxTasksTodo;
+    }
+
+    public function setMaxTasksTodo(int $maxTasksTodo): static
+    {
+        $this->maxTasksTodo = $maxTasksTodo;
+        return $this;
+    }
+
+    public function getMaxTasksInProgress(): int
+    {
+        return $this->maxTasksInProgress;
+    }
+
+    public function setMaxTasksInProgress(int $maxTasksInProgress): static
+    {
+        $this->maxTasksInProgress = $maxTasksInProgress;
         return $this;
     }
 

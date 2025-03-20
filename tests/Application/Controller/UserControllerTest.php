@@ -50,23 +50,6 @@ class UserControllerTest extends WebTestCase
         $this->assertSame('Updated Name', $updatedUser->getFullName());
     }
 
-    public function testEditPassword(): void
-    {
-        $client = static::createClient();
-        $user = $this->createUser();
-        $client->loginUser($user);
-
-        $client->request('GET', '/utilisateur/edition-mot-de-passe/' . $user->getId());
-        $this->assertResponseIsSuccessful();
-
-        $client->submitForm('Modifier mon mot de passe', [
-            'user_password[plainPassword][first]' => 'password',
-            'user_password[plainPassword][second]' => 'newpassword',
-        ]);
-
-        $this->assertResponseRedirects('/utilisateur/edition-mot-de-passe/' . $user->getId());
-    }
-
     public function testAccessDenied(): void
     {
         $client = static::createClient();

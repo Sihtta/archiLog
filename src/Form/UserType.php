@@ -11,6 +11,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+
 
 class UserType extends AbstractType
 {
@@ -55,6 +57,14 @@ class UserType extends AbstractType
                 'label_attr' => [
                     'class' => 'form-label  mt-4'
                 ]
+            ])
+            ->add('maxTasksTodo', IntegerType::class, [
+                'label' => 'Limite de tâches à faire',
+                'required' => false,
+            ])
+            ->add('maxTasksInProgress', IntegerType::class, [
+                'label' => 'Limite de tâches en cours',
+                'required' => false,
             ])
             ->add('Submit', SubmitType::class, [
                 'attr' => [

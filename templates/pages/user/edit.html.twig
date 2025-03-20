@@ -13,7 +13,6 @@
 			</div>
 		{% endfor %}
 
-
 		{{ form_start(form, { 'attr': { 'id': 'editProfileForm' } }) }}
 
 		<div class="floating-label">
@@ -51,6 +50,27 @@
 			{{ form_errors(form.plainPassword) }}
 		</div>
 
+		<div class="floating-label">
+			{{ form_widget(form.maxTasksTodo, { 'attr': { 'placeholder': 'Limite de tâches à faire' } }) }}
+			<label for="user_maxTasksTodo">Limite de tâches à faire</label>
+			<div class="icon">
+				<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+					<path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+				</svg>
+			</div>
+			{{ form_errors(form.maxTasksTodo) }}
+		</div>
+
+		<div class="floating-label">
+			{{ form_widget(form.maxTasksInProgress, { 'attr': { 'placeholder': 'Limite de tâches en cours' } }) }}
+			<label for="user_maxTasksInProgress">Limite de tâches en cours</label>
+			<div class="icon">
+				<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+					<path d="M5 3h14v2H5V3zm2 4h10v2H7V7zm-2 4h14v2H5v-2zm2 4h10v2H7v-2z"/>
+				</svg>
+			</div>
+			{{ form_errors(form.maxTasksInProgress) }}
+		</div>
 
 		{{ form_end(form) }}
 
