@@ -20,10 +20,9 @@ class UserTaskFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create('fr_FR'); // Générateur de données en français
+        $faker = Factory::create('fr_FR');
         $users = [];
 
-        // Création de 5 utilisateurs
         for ($i = 1; $i <= 5; $i++) {
             $user = new User();
             $user->setEmail($faker->unique()->email)
@@ -36,7 +35,6 @@ class UserTaskFixtures extends Fixture
             $users[] = $user;
         }
 
-        // Création de 10 tâches aléatoires
         for ($i = 1; $i <= 10; $i++) {
             $task = new Task();
             $task->setTitle($faker->sentence(3))
@@ -47,7 +45,6 @@ class UserTaskFixtures extends Fixture
             $manager->persist($task);
         }
 
-        // Envoi en base
         $manager->flush();
     }
 }

@@ -15,13 +15,11 @@ class NotificationService
         $this->discordWebhookUrl = $discordWebhookUrl;
     }
 
-    // Cette méthode update implémente le comportement de l'Observer pour notifier les changements
     public function update(string $message): void
     {
         $this->sendTaskStatusUpdate($message);
     }
 
-    // Méthode qui envoie réellement la notification via Discord
     public function sendTaskStatusUpdate(string $message): void
     {
         if (empty($this->discordWebhookUrl)) {
@@ -33,7 +31,6 @@ class NotificationService
                 'json' => ['content' => $message],
             ]);
         } catch (\Exception $e) {
-            // Gérer l'erreur
         }
     }
 }

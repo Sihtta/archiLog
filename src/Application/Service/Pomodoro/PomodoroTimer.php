@@ -1,7 +1,5 @@
 <?php
 
-// src/Application/Service/Pomodoro/PomodoroTimer.php
-
 namespace App\Application\Service\Pomodoro;
 
 use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;

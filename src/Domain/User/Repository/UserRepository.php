@@ -20,9 +20,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         parent::__construct($registry, User::class);
     }
 
-    /**
-     * Used to upgrade (rehash) the user's password automatically over time.
-     */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
@@ -34,9 +31,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    /**
-     * Trouver un utilisateur par email.
-     */
     public function findOneByEmail(string $email): ?User
     {
         return $this->createQueryBuilder('u')
@@ -46,9 +40,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getOneOrNullResult();
     }
 
-    /**
-     * Récupérer les utilisateurs triés par expérience (les plus expérimentés en premier).
-     */
     public function findTopUsersByExp(int $limit = 10): array
     {
         return $this->createQueryBuilder('u')

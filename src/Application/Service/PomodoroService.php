@@ -1,7 +1,5 @@
 <?php
 
-// src/Application/Service/Pomodoro/PomodoroService.php
-
 namespace App\Application\Service;
 
 use App\Application\Service\Pomodoro\Strategy\PomodoroStrategyInterface;
@@ -22,19 +20,16 @@ class PomodoroService
         $this->requestStack = $requestStack;
     }
 
-    // Obtient le temps restant
     public function getRemainingTime(): int
     {
         return $this->remainingTime;
     }
 
-    // Démarre ou met en pause le timer
     public function toggleRunning(): void
     {
         $this->isRunning = !$this->isRunning;
     }
 
-    // Retourne si le timer est en cours d'exécution
     public function isRunning(): bool
     {
         return $this->isRunning;
