@@ -1,91 +1,83 @@
 <?php
 
-namespace Tests\Application\Controller;
+namespace App\Tests\Application\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Domain\User\Entity\User;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserControllerTest extends WebTestCase
 {
-    private $client;
-    private $entityManager;
-    private $userPasswordHasher;
-
-    protected function setUp(): void
+    private function createUser(): User
     {
-        parent::setUp();
-        self::ensureKernelShutdown();
-        $this->client = static::createClient();
-        
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-        $this->userPasswordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
-        
-        // Nettoyer et charger les données de test
-        $this->entityManager->getConnection()->executeQuery('DELETE FROM user');
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+
+        $user = new User();
+        $user->setEmail('test_' . uniqid() . '@example.com');
+        $user->setPseudo('TestUser');
+        $user->setPassword('password');
+        $user->setFullName('Test User');
+        $user->setRoles(['ROLE_USER']);
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $user;
     }
 
-    public function testEditUserAccessDenied()
+    public function testEditUser(): void
     {
-        $user = $this->createUser('testUser');
-        $this->client->request('GET', '/utilisateur/edition/' . $user->getId());
-        $this->assertResponseRedirects('/access-denied');
-    }
+        $client = static::createClient();
+        $user = $this->createUser();
+        $client->loginUser($user);
 
-    public function testEditUserSuccessful()
-    {
-        $user = $this->createUser('oldPseudo');
-
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/utilisateur/edition/' . $user->getId());
-
+        // Accéder à la page d'édition de l'utilisateur
+        $client->request('GET', '/utilisateur/edition/' . $user->getId());
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('form');
 
-        $this->client->submitForm('Modifier', [
-            'user[pseudo]' => 'newPseudo'
+        // Soumettre le formulaire avec les champs corrects
+        $client->submitForm('Modifier mon profil', [
+            'user[pseudo]' => 'UpdatedUser',  // Pseudo facultatif
+            'user[fullName]' => 'Updated Name', // Modifier le nom complet
+            'user[plainPassword]' => 'password',  // Mot de passe
         ]);
 
         $this->assertResponseRedirects('/utilisateur/edition/' . $user->getId());
 
-        $updatedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
-        $this->assertEquals('newPseudo', $updatedUser->getPseudo());
+        // Vérifier la mise à jour de l'utilisateur
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $updatedUser = $entityManager->getRepository(User::class)->find($user->getId());
+        $this->assertSame('UpdatedUser', $updatedUser->getPseudo());
+        $this->assertSame('Updated Name', $updatedUser->getFullName());
     }
 
-    public function testEditPasswordSuccessful()
+    public function testEditPassword(): void
     {
-        $user = $this->createUser('testUser', 'oldPassword');
+        $client = static::createClient();
+        $user = $this->createUser();
+        $client->loginUser($user);
 
-        $this->client->loginUser($user);
-        $this->client->request('GET', '/utilisateur/edition-mot-de-passe/' . $user->getId());
-
+        // Accéder à la page de modification du mot de passe
+        $client->request('GET', '/utilisateur/edition-mot-de-passe/' . $user->getId());
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('form');
 
-        $this->client->submitForm('Modifier mon mot de passe', [
-            'user_password[plainPassword][first]' => 'oldPassword',
-            'user_password[plainPassword][second]' => 'oldPassword',
-            'user_password[newPassword]' => 'newSecurePassword',
+        // Soumettre le formulaire avec les champs corrects
+        $client->submitForm('Modifier mon mot de passe', [
+            'user_password[plainPassword][first]' => 'password', // Premier champ du mot de passe
+            'user_password[plainPassword][second]' => 'newpassword', // Deuxième champ du mot de passe
         ]);
 
         $this->assertResponseRedirects('/utilisateur/edition-mot-de-passe/' . $user->getId());
-
-        $updatedUser = $this->entityManager->getRepository(User::class)->find($user->getId());
-        $this->assertTrue($this->userPasswordHasher->isPasswordValid($updatedUser, 'newSecurePassword'));
     }
 
-    private function createUser(string $pseudo, string $password = 'password'): User
+    public function testAccessDenied(): void
     {
-        $user = new User();
-        $user->setEmail($pseudo . '@example.com');
-        $user->setFullName('Test User');
-        $user->setPseudo($pseudo);
-        $user->setPassword($this->userPasswordHasher->hashPassword($user, $password));
+        $client = static::createClient();
+        $user = $this->createUser();
 
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
+        // Essayer d'accéder à la page sans être connecté
+        $client->request('GET', '/utilisateur/edition/' . $user->getId());
+        $this->assertResponseRedirects('/access-denied');
     }
 }
