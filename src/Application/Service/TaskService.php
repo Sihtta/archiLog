@@ -2,7 +2,7 @@
 
 namespace App\Application\Service;
 
-use App\Application\Port\Repository\TaskRepositoryInterface;
+use App\Domain\Task\Repository\TaskRepositoryInterface;
 use App\Domain\Task\Entity\Task;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Domain\User\Entity\User;

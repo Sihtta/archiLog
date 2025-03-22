@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Port\Repository;
+namespace App\Domain\Task\Repository;
 
 use App\Domain\Task\Entity\Task;
 use Doctrine\Persistence\ObjectRepository;

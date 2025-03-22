@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Domain\User\Repository;
+namespace App\Application\Port\Repository;
 
 use App\Domain\User\Entity\User;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -11,9 +12,8 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
- * @implements PasswordUpgraderInterface<User>
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements UserRepositoryInterface, PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
