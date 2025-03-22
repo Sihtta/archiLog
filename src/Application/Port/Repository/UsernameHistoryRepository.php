@@ -1,24 +1,40 @@
 <?php
 
-namespace App\Domain\User\Repository;
+namespace App\Application\Port\Repository;
 
 use App\Domain\User\Entity\UsernameHistory;
+use App\Domain\User\Repository\UsernameHistoryRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<UsernameHistory>
- *
- * @method UsernameHistory|null find($id, $lockMode = null, $lockVersion = null)
- * @method UsernameHistory|null findOneBy(array $criteria, array $orderBy = null)
- * @method UsernameHistory[]    findAll()
- * @method UsernameHistory[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UsernameHistoryRepository extends ServiceEntityRepository
+class UsernameHistoryRepository extends ServiceEntityRepository implements UsernameHistoryRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, UsernameHistory::class);
+    }
+
+    public function find($id, $lockMode = null, $lockVersion = null): ?UsernameHistory
+    {
+        return parent::find($id, $lockMode, $lockVersion);
+    }
+
+    public function findOneBy(array $criteria, array $orderBy = null): ?UsernameHistory
+    {
+        return parent::findOneBy($criteria, $orderBy);
+    }
+
+    public function findAll(): array
+    {
+        return parent::findAll();
+    }
+
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
+    {
+        return parent::findBy($criteria, $orderBy, $limit, $offset);
     }
 
     //    /**
@@ -32,8 +48,7 @@ class UsernameHistoryRepository extends ServiceEntityRepository
     //            ->orderBy('u.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
-    //            ->getResult()
-    //        ;
+    //            ->getResult();
     //    }
 
     //    public function findOneBySomeField($value): ?UsernameHistory
@@ -42,7 +57,6 @@ class UsernameHistoryRepository extends ServiceEntityRepository
     //            ->andWhere('u.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
+    //            ->getOneOrNullResult();
     //    }
 }

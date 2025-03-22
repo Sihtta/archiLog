@@ -2,7 +2,7 @@
 
 namespace App\Domain\User\Entity;
 
-use App\Domain\User\Repository\UsernameHistoryRepository;
+use App\Application\Port\Repository\UsernameHistoryRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UsernameHistoryRepository::class)]
