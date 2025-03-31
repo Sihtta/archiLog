@@ -14,6 +14,9 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
         parent::__construct($registry, Task::class);
     }
 
+    /**
+     * Récupère toutes les tâches d'un utilisateur spécifique, triées par date de création décroissante.
+     */
     public function findByUser(int $userId): array
     {
         return $this->createQueryBuilder('t')
@@ -24,6 +27,9 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
             ->getResult();
     }
 
+    /**
+     * Récupère toutes les tâches avec un statut donné, triées par date de création décroissante.
+     */
     public function findByStatus(string $status): array
     {
         return $this->createQueryBuilder('t')
@@ -34,20 +40,29 @@ class TaskRepository extends ServiceEntityRepository implements TaskRepositoryIn
             ->getResult();
     }
 
+    /**
+     * Sauvegarde une tâche en base de données.
+     */
     public function save(Task $task): void
-{
-    $em = $this->getEntityManager();
-    $em->persist($task);
-    $em->flush();
-}
+    {
+        $em = $this->getEntityManager();
+        $em->persist($task);
+        $em->flush();
+    }
 
-public function delete(Task $task): void
-{
-    $em = $this->getEntityManager();
-    $em->remove($task);
-    $em->flush();
-}
+    /**
+     * Supprime une tâche de la base de données.
+     */
+    public function delete(Task $task): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($task);
+        $em->flush();
+    }
 
+    /**
+     * Récupère les tâches ayant une date limite imminente (dans les 24 heures).
+     */
     public function findTasksWithUpcomingDeadlines(): array
     {
         $qb = $this->createQueryBuilder('t')

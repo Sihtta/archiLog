@@ -11,6 +11,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 /**
+ * Repository pour la gestion des utilisateurs.
+ *
  * @extends ServiceEntityRepository<User>
  */
 class UserRepository extends ServiceEntityRepository implements UserRepositoryInterface, PasswordUpgraderInterface
@@ -20,6 +22,9 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * Met à jour le mot de passe d'un utilisateur.
+     */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
@@ -31,6 +36,9 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
         $this->getEntityManager()->flush();
     }
 
+    /**
+     * Recherche un utilisateur par son email.
+     */
     public function findOneByEmail(string $email): ?User
     {
         return $this->createQueryBuilder('u')
@@ -40,6 +48,9 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
             ->getOneOrNullResult();
     }
 
+    /**
+     * Récupère les utilisateurs ayant le plus d'expérience.
+     */
     public function findTopUsersByExp(int $limit = 10): array
     {
         return $this->createQueryBuilder('u')

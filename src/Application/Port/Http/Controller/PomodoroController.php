@@ -28,10 +28,10 @@ class PomodoroController extends AbstractController
         ]);
     }
 
-
     /**
-     * @Route("/pomodoro/strategy/{duration}", name="pomodoro_strategy")
+     * Change la stratégie Pomodoro en fonction de la durée passée en paramètre.
      */
+    #[Route('/pomodoro/strategy/{duration}', name: 'pomodoro_strategy')]
     public function changeStrategy(string $duration): Response
     {
         if (!isset($this->strategies[$duration])) {

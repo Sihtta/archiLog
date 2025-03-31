@@ -28,16 +28,15 @@ class TaskController extends AbstractController
         }
 
         $user = $this->getUser();
-
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException('Utilisateur non trouvé.');
         }
 
         $tasks = $this->taskService->getTasksByUser($user);
 
+        // Calcul du nombre de tâches par statut
         $maxTasksTodo = $user->getMaxTasksTodo();
         $maxTasksInProgress = $user->getMaxTasksInProgress();
-
         $currentTasksTodo = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
         $currentTasksInProgress = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'in_progress')->count();
 
@@ -50,7 +49,6 @@ class TaskController extends AbstractController
         ]);
     }
 
-
     #[Route('/tasks/new', name: 'task_create')]
     public function create(Request $request): Response
     {
@@ -60,9 +58,9 @@ class TaskController extends AbstractController
             throw $this->createAccessDeniedException('Vous devez être connecté pour créer une tâche.');
         }
 
+        // Vérifie si l'utilisateur a atteint sa limite de tâches "À faire"
         $currentTasksTodo = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
         $maxTasksTodo = $user->getMaxTasksTodo();
-
         if ($currentTasksTodo >= $maxTasksTodo) {
             $this->addFlash('error', 'Vous avez atteint la limite de tâches "À faire".');
             return $this->redirectToRoute('task_index');
@@ -89,7 +87,6 @@ class TaskController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 
     #[Route('/tasks/{id}/edit', name: 'task_edit')]
     public function edit(Task $task, Request $request): Response
@@ -131,6 +128,7 @@ class TaskController extends AbstractController
             throw $this->createAccessDeniedException('Utilisateur non trouvé.');
         }
 
+        // Vérifie si l'utilisateur peut déplacer une tâche vers "En cours"
         if ($task->getStatus() === Task::STATUS_TODO && $status === Task::STATUS_IN_PROGRESS) {
             $currentTasksInProgress = $user->getTasks()->filter(fn($t) => $t->getStatus() === Task::STATUS_IN_PROGRESS)->count();
             $maxTasksInProgress = $user->getMaxTasksInProgress();

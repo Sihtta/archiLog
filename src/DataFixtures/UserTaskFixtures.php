@@ -23,6 +23,7 @@ class UserTaskFixtures extends Fixture
         $faker = Factory::create('fr_FR');
         $users = [];
 
+        // Création de 5 utilisateurs fictifs
         for ($i = 1; $i <= 5; $i++) {
             $user = new User();
             $user->setEmail($faker->unique()->email)
@@ -35,6 +36,7 @@ class UserTaskFixtures extends Fixture
             $users[] = $user;
         }
 
+        // Création de 10 tâches fictives associées aléatoirement à un utilisateur
         for ($i = 1; $i <= 10; $i++) {
             $task = new Task();
             $task->setTitle($faker->sentence(3))

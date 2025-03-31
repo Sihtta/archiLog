@@ -16,6 +16,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class SecurityController extends AbstractController
 {
+    /**
+     * Gère la connexion des utilisateurs.
+     */
     #[Route('/connexion', name: 'security.login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
@@ -28,20 +31,27 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * Gère la déconnexion (Symfony s'en occupe automatiquement via le firewall).
+     */
     #[Route('/deconnexion', name: 'security.logout')]
     public function logout() {}
 
+    /**
+     * Gère l'inscription d'un nouvel utilisateur.
+     */
     #[Route('/inscription', 'security.registration', methods: ['GET', 'POST'])]
     public function registration(Request $request, EntityManagerInterface $manager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
-        $user->setRoles(['ROLE_USER']);
+        $user->setRoles(['ROLE_USER']); // Assigne un rôle par défaut à l'utilisateur
         $form = $this->createForm(RegistrationType::class, $user);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $user->getPlainPassword();
 
+            // Hachage du mot de passe avant sauvegarde en base de données
             $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($hashedPassword);
 
@@ -57,7 +67,9 @@ class SecurityController extends AbstractController
         ]);
     }
 
-
+    /**
+     * Redirige l'utilisateur après connexion selon son rôle.
+     */
     #[Route('/redirect-after-login', name: 'security.redirect_after_login')]
     public function redirectAfterLogin(AuthorizationCheckerInterface $authorizationChecker): RedirectResponse
     {

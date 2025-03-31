@@ -12,15 +12,19 @@ class TaskReportService
 
     public function __construct(string $reportDirectory, EntityManagerInterface $entityManager)
     {
-        $this->reportDirectory = rtrim($reportDirectory, '/');
+        $this->reportDirectory = rtrim($reportDirectory, '/'); // S'assure que le chemin ne se termine pas par un "/"
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * Enregistre une tâche complétée dans un fichier de rapport quotidien.
+     */
     public function logCompletedTask(Task $task): void
     {
         $date = (new \DateTime())->format('Y-m-d');
         $filePath = "{$this->reportDirectory}/tasks_completed_{$date}.txt";
 
+        // Vérifie si la tâche est déjà enregistrée pour éviter les doublons
         if (file_exists($filePath)) {
             $existingContent = file_get_contents($filePath);
             if (str_contains($existingContent, "ID: {$task->getId()}")) {

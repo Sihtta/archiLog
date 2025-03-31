@@ -9,6 +9,7 @@ use App\Domain\User\Entity\User;
 #[ORM\Entity]
 class Task
 {
+    // Définition des statuts possibles d'une tâche
     public const STATUS_TODO = 'todo';
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_DONE = 'done';
@@ -16,39 +17,39 @@ class Task
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id = null; // Identifiant unique de la tâche
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank()]
-    #[Assert\Length(min: 3, max: 255)]
+    #[Assert\NotBlank()] // Le titre ne peut pas être vide
+    #[Assert\Length(min: 3, max: 255)] // Contraintes sur la longueur du titre
     private ?string $title = null;
 
     #[ORM\Column(type: "text", nullable: true)]
-    private ?string $description = null;
+    private ?string $description = null; // Description optionnelle de la tâche
 
     #[ORM\Column(type: "datetime_immutable")]
-    #[Assert\NotNull()]
+    #[Assert\NotNull()] // La date de création est obligatoire
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?\DateTime $dueDate = null;
+    private ?\DateTime $dueDate = null; // Date d'échéance facultative
 
     #[ORM\Column(length: 50)]
-    #[Assert\Choice([self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])]
+    #[Assert\Choice([self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])] // Validation du statut
     private ?string $status = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false)] // Une tâche doit être associée à un utilisateur
     private ?User $user = null;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?\DateTime $completedAt = null;
+    private ?\DateTime $completedAt = null; // Date de complétion optionnelle
 
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         if ($this->status === null) {
-            $this->status = self::STATUS_TODO;
+            $this->status = self::STATUS_TODO; // Par défaut, une nouvelle tâche est à faire
         }
     }
 
@@ -119,7 +120,7 @@ class Task
 
     public function isDone(): bool
     {
-        return $this->status === self::STATUS_DONE;
+        return $this->status === self::STATUS_DONE; // Vérifie si la tâche est terminée
     }
 
     public function getCompletedAt(): ?\DateTime

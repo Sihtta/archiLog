@@ -7,12 +7,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-
 
 class UserType extends AbstractType
 {
@@ -27,11 +25,11 @@ class UserType extends AbstractType
                 ],
                 'label' => 'Nom / Prénom',
                 'label_attr' => [
-                    'class' => 'form-label  mt-4'
+                    'class' => 'form-label mt-4'
                 ],
                 'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['min' => 2, 'max' => 50])
+                    new Assert\NotBlank(), // Vérifie que le champ n'est pas vide
+                    new Assert\Length(['min' => 2, 'max' => 50]) // Vérifie la longueur du texte
                 ]
             ])
             ->add('pseudo', TextType::class, [
@@ -40,13 +38,13 @@ class UserType extends AbstractType
                     'minlenght' => '2',
                     'maxlenght' => '50',
                 ],
-                'required' => false,
+                'required' => false, // Champ optionnel
                 'label' => 'Pseudo (Facultatif)',
                 'label_attr' => [
-                    'class' => 'form-label  mt-4'
+                    'class' => 'form-label mt-4'
                 ],
                 'constraints' => [
-                    new Assert\Length(['min' => 2, 'max' => 50])
+                    new Assert\Length(['min' => 2, 'max' => 50]) // Vérifie la longueur si renseigné
                 ]
             ])
             ->add('plainPassword', PasswordType::class, [
@@ -55,16 +53,16 @@ class UserType extends AbstractType
                 ],
                 'label' => 'Mot de passe pour confirmer',
                 'label_attr' => [
-                    'class' => 'form-label  mt-4'
+                    'class' => 'form-label mt-4'
                 ]
             ])
             ->add('maxTasksTodo', IntegerType::class, [
                 'label' => 'Limite de tâches à faire',
-                'required' => false,
+                'required' => false, // Champ optionnel
             ])
             ->add('maxTasksInProgress', IntegerType::class, [
                 'label' => 'Limite de tâches en cours',
-                'required' => false,
+                'required' => false, // Champ optionnel
             ])
             ->add('Submit', SubmitType::class, [
                 'attr' => [
@@ -77,7 +75,7 @@ class UserType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => User::class, // Associe ce formulaire à l'entité User
         ]);
     }
 }

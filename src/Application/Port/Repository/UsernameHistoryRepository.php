@@ -8,6 +8,8 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
+ * Repository pour la gestion de l'historique des changements de pseudonyme.
+ *
  * @extends ServiceEntityRepository<UsernameHistory>
  */
 class UsernameHistoryRepository extends ServiceEntityRepository implements UsernameHistoryRepositoryInterface
@@ -17,21 +19,33 @@ class UsernameHistoryRepository extends ServiceEntityRepository implements Usern
         parent::__construct($registry, UsernameHistory::class);
     }
 
+    /**
+     * Recherche un historique de changement de pseudonyme par son identifiant.
+     */
     public function find($id, $lockMode = null, $lockVersion = null): ?UsernameHistory
     {
         return parent::find($id, $lockMode, $lockVersion);
     }
 
+    /**
+     * Recherche un historique selon des critères donnés.
+     */
     public function findOneBy(array $criteria, array $orderBy = null): ?UsernameHistory
     {
         return parent::findOneBy($criteria, $orderBy);
     }
 
+    /**
+     * Récupère tous les historiques de changement de pseudonyme.
+     */
     public function findAll(): array
     {
         return parent::findAll();
     }
 
+    /**
+     * Recherche plusieurs historiques selon des critères donnés.
+     */
     public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
     {
         return parent::findBy($criteria, $orderBy, $limit, $offset);

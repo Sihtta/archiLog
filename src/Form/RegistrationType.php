@@ -18,13 +18,14 @@ class RegistrationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            // Champ pour le nom complet
             ->add('fullName', TextType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'minlength' => '2',
                     'maxlenght' => '50',
                 ],
-                'label' => 'Nom / PrÃ©nom',
+                'label' => 'Nom / Prénom',
                 'label_attr' => [
                     'class' => 'form-label mt-4'
                 ],
@@ -33,6 +34,7 @@ class RegistrationType extends AbstractType
                     new Assert\Length(['min' => 2, 'max' => 50])
                 ]
             ])
+            // Champ pour le pseudo (optionnel)
             ->add('pseudo', TextType::class, [
                 'attr' => [
                     'class' => 'form-control',
@@ -48,6 +50,7 @@ class RegistrationType extends AbstractType
                     new Assert\Length(['min' => 2, 'max' => 50])
                 ]
             ])
+            // Champ pour l'email
             ->add('email', EmailType::class, [
                 'attr' => [
                     'class' => 'form-control',
@@ -64,6 +67,7 @@ class RegistrationType extends AbstractType
                     new Assert\Length(['min' => 2, 'max' => 180])
                 ]
             ])
+            // Champ pour le mot de passe (avec confirmation)
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'first_options' => [
@@ -86,6 +90,7 @@ class RegistrationType extends AbstractType
                 ],
                 'invalid_message' => 'Les mots de passe ne correspondent pas.'
             ])
+            // Bouton de soumission
             ->add('Submit', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-primary mt-4 w-100'
@@ -96,6 +101,7 @@ class RegistrationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        // Associe le formulaire à l'entité User
         $resolver->setDefaults([
             'data_class' => User::class,
         ]);

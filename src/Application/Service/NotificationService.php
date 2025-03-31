@@ -15,11 +15,17 @@ class NotificationService
         $this->discordWebhookUrl = $discordWebhookUrl;
     }
 
+    /**
+     * Met à jour l'état d'une tâche en envoyant une notification.
+     */
     public function update(string $message): void
     {
         $this->sendTaskStatusUpdate($message);
     }
 
+    /**
+     * Envoie un message via un webhook Discord.
+     */
     public function sendTaskStatusUpdate(string $message): void
     {
         if (empty($this->discordWebhookUrl)) {
@@ -31,6 +37,7 @@ class NotificationService
                 'json' => ['content' => $message],
             ]);
         } catch (\Exception $e) {
+            // Évite que l'application plante en cas d'erreur d'envoi
         }
     }
 }

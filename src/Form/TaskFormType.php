@@ -17,21 +17,25 @@ class TaskFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            // Champ pour le titre de la tâche
             ->add('title', TextType::class, [
                 'label' => 'Titre',
                 'attr' => ['class' => 'form-control'],
             ])
+            // Champ pour la description (optionnel)
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
+            // Champ pour la date limite (optionnelle)
             ->add('dueDate', DateTimeType::class, [
                 'label' => 'Date limite',
                 'widget' => 'single_text',
                 'required' => false,
                 'attr' => ['class' => 'form-control'],
             ])
+            // Champ pour le statut de la tâche
             ->add('status', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
@@ -41,6 +45,7 @@ class TaskFormType extends AbstractType
                 ],
                 'attr' => ['class' => 'form-control'],
             ])
+            // Bouton de soumission du formulaire
             ->add('save', SubmitType::class, [
                 'label' => 'Créer la tâche',
                 'attr' => ['class' => 'btn btn-primary mt-3'],
@@ -49,6 +54,7 @@ class TaskFormType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        // Associe le formulaire à l'entité Task
         $resolver->setDefaults([
             'data_class' => Task::class,
         ]);

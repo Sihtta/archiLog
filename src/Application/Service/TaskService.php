@@ -28,6 +28,9 @@ class TaskService
         $this->observers[] = $this->notificationService;
     }
 
+    /**
+     * Crée une nouvelle tâche, en vérifiant les limites de tâches "À faire" et "En cours".
+     */
     public function createTask(string $title, ?string $description, ?\DateTime $dueDate, string $status, User $user): Task
     {
         $tasksTodoCount = $user->getTasks()->filter(fn($task) => $task->getStatus() === 'todo')->count();
@@ -54,22 +57,34 @@ class TaskService
         return $task;
     }
 
+    /**
+     * Met à jour une tâche existante.
+     */
     public function updateTask(Task $task): void
     {
         $this->entityManager->flush();
     }
 
+    /**
+     * Supprime une tâche.
+     */
     public function deleteTask(Task $task): void
     {
         $this->entityManager->remove($task);
         $this->entityManager->flush();
     }
 
+    /**
+     * Récupère toutes les tâches d'un utilisateur spécifique.
+     */
     public function getTasksByUser(User $user): array
     {
         return $this->taskRepository->findByUser($user->getId());
     }
 
+    /**
+     * Notifie les observateurs avec un message donné.
+     */
     private function notifyObservers(string $message): void
     {
         foreach ($this->observers as $observer) {
@@ -77,6 +92,9 @@ class TaskService
         }
     }
 
+    /**
+     * Vérifie les échéances des tâches et notifie les utilisateurs.
+     */
     public function checkTaskDeadlines(): void
     {
         $tasks = $this->taskRepository->findTasksWithUpcomingDeadlines();
@@ -96,6 +114,9 @@ class TaskService
         }
     }
 
+    /**
+     * Met à jour le statut d'une tâche et gère les actions associées, telles que l'ajout d'XP.
+     */
     public function updateTaskStatus(Task $task, string $status): void
     {
         $task->setStatus($status);
@@ -105,7 +126,7 @@ class TaskService
             $task->setCompletedAt(new \DateTime());
 
             if ($user) {
-                $user->addExp(20);
+                $user->addExp(20); // Ajouter de l'XP à l'utilisateur lorsqu'une tâche est marquée comme terminée
                 $this->entityManager->persist($user);
             }
 

@@ -20,7 +20,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id = null; // Identifiant unique de l'utilisateur
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Email()]
@@ -28,39 +28,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 50, nullable: false)]
     #[Assert\NotBlank()]
-    private ?string $fullName = null;
+    private ?string $fullName = null; // Nom complet obligatoire
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $pseudo = null;
+    private ?string $pseudo = null; // Pseudo optionnel
 
     #[ORM\Column]
-    private array $roles = [];
+    private array $roles = []; // Rôles de l'utilisateur (ex: ROLE_USER, ROLE_ADMIN)
 
-    private ?string $plainPassword = null;
+    private ?string $plainPassword = null; // Mot de passe en clair (non stocké en BDD)
 
     #[ORM\Column]
-    private ?string $password = 'password';
+    private ?string $password = 'password'; // Mot de passe hashé
 
     #[ORM\Column]
     #[Assert\NotNull()]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null; // Date d'inscription
 
     #[ORM\Column(options: ["default" => 0])]
     #[Assert\NotNull()]
     #[Assert\PositiveOrZero()]
-    private int $exp = 0;
+    private int $exp = 0; // Expérience acquise par l'utilisateur
 
     #[ORM\Column(type: 'integer', options: ['default' => 10])]
     #[Assert\Positive()]
-    private int $maxTasksTodo = 10;
+    private int $maxTasksTodo = 10; // Nombre max de tâches "à faire"
 
     #[ORM\Column(type: 'integer', options: ['default' => 10])]
     #[Assert\Positive()]
-    private int $maxTasksInProgress = 10;
-
+    private int $maxTasksInProgress = 10; // Nombre max de tâches "en cours"
 
     #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
-    private Collection $tasks;
+    private Collection $tasks; // Collection des tâches de l'utilisateur
 
     public function __construct()
     {
@@ -233,7 +232,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
-        return "images/" . min($imageIndex, 7) . ".png";
+        return "images/" . min($imageIndex, 7) . ".png"; // Renvoie l'image correspondant au niveau d'expérience
     }
 
     public function getTreeSize(): int
@@ -248,7 +247,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
-        return $sizes[min($sizeIndex, count($sizes) - 1)];
+        return $sizes[min($sizeIndex, count($sizes) - 1)]; // Détermine la taille de l'arbre en fonction de l'XP
     }
 
     public function __toString(): string

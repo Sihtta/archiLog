@@ -18,6 +18,7 @@ class UserController extends AbstractController
     #[Route('/utilisateur/edition/{id}', name: 'user.edit', methods: ['GET', 'POST'])]
     public function edit(User $choosenUser, Request $request, EntityManagerInterface $manager): Response
     {
+        // Vérifie que l'utilisateur est bien autorisé à modifier son propre profil
         if (!$this->isGranted('ROLE_USER') || $this->getUser() !== $choosenUser) {
             return $this->redirectToRoute('access_denied');
         }
@@ -29,6 +30,7 @@ class UserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $newPseudo = $form->getData()->getPseudo();
 
+            // Sauvegarde l'ancien pseudo dans l'historique si celui-ci change
             if ($oldPseudo !== $newPseudo) {
                 $usernameHistory = new UsernameHistory();
                 $usernameHistory->setUser($choosenUser)
@@ -57,6 +59,7 @@ class UserController extends AbstractController
     #[Route('/utilisateur/edition-mot-de-passe/{id}', 'user.edit.password', methods: ['GET', 'POST'])]
     public function editPassword(User $choosenUser, Request $request, EntityManagerInterface $manager, UserPasswordHasherInterface $hasher): Response
     {
+        // Vérifie que l'utilisateur tente bien de modifier son propre mot de passe
         if (!$this->isGranted('ROLE_USER') || $this->getUser() !== $choosenUser) {
             return $this->redirectToRoute('access_denied');
         }
@@ -65,6 +68,7 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifie que l'ancien mot de passe est correct avant de le modifier
             if ($hasher->isPasswordValid($choosenUser, $form->getData()['plainPassword'])) {
                 $choosenUser->setPassword(
                     $hasher->hashPassword($choosenUser, $form->getData()['newPassword'])
