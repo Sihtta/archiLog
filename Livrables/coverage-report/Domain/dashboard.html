@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for C:\Users\matth\Projet\A6\src\Domain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">C:\Users\matth\Projet\A6\src</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Domain</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Task/Repository/TaskRepository.php.html#10">App\Domain\Task\Repository\TaskRepository</a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="User/Entity/User.php.html#15">App\Domain\User\Entity\User</a></td><td class="text-right">85%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="User/Entity/User.php.html#15">App\Domain\User\Entity\User</a></td><td class="text-right">37</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Task/Repository/TaskRepository.php.html#17"><abbr title="App\Domain\Task\Repository\TaskRepository::findByUser">findByUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Task/Repository/TaskRepository.php.html#51"><abbr title="App\Domain\Task\Repository\TaskRepository::findTasksWithUpcomingDeadlines">findTasksWithUpcomingDeadlines</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="User/Entity/User.php.html#208"><abbr title="App\Domain\User\Entity\User::getTreeSize">getTreeSize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="User/Entity/User.php.html#184"><abbr title="App\Domain\User\Entity\User::removeTask">removeTask</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="User/Repository/UserRepository.php.html#23"><abbr title="App\Domain\User\Repository\UserRepository::upgradePassword">upgradePassword</abbr></a></td><td class="text-right">80%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="User/Entity/User.php.html#208"><abbr title="App\Domain\User\Entity\User::getTreeSize">getTreeSize</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="User/Entity/User.php.html#184"><abbr title="App\Domain\User\Entity\User::removeTask">removeTask</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="User/Repository/UserRepository.php.html#23"><abbr title="App\Domain\User\Repository\UserRepository::upgradePassword">upgradePassword</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 9.2.32</a> using <a href="https://secure.php.net/" target="_top">PHP 8.2.12</a> and <a href="https://phpunit.de/">PHPUnit 9.6.22</a> at Thu Mar 20 14:35:45 CET 2025.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=9.2.32" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=9.2.32" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=9.2.32" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([0,0,0,0,0,0,1,0,0,1,1,5], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([3,0,0,0,0,0,0,0,1,1,0,61], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[100,2,"<a href=\"Notification\/Observer\/DiscordNotifier.php.html#8\">App\\Domain\\Notification\\Observer\\DiscordNotifier<\/a>"],[100,3,"<a href=\"Notification\/TaskNotifier.php.html#7\">App\\Domain\\Notification\\TaskNotifier<\/a>"],[100,17,"<a href=\"Task\/Entity\/Task.php.html#9\">App\\Domain\\Task\\Entity\\Task<\/a>"],[50,6,"<a href=\"Task\/Repository\/TaskRepository.php.html#10\">App\\Domain\\Task\\Repository\\TaskRepository<\/a>"],[85.18518518518519,34,"<a href=\"User\/Entity\/User.php.html#15\">App\\Domain\\User\\Entity\\User<\/a>"],[100,9,"<a href=\"User\/Entity\/UsernameHistory.php.html#8\">App\\Domain\\User\\Entity\\UsernameHistory<\/a>"],[93.75,5,"<a href=\"User\/Repository\/UserRepository.php.html#16\">App\\Domain\\User\\Repository\\UserRepository<\/a>"],[100,1,"<a href=\"User\/Repository\/UsernameHistoryRepository.php.html#17\">App\\Domain\\User\\Repository\\UsernameHistoryRepository<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"Notification\/Observer\/DiscordNotifier.php.html#13\">App\\Domain\\Notification\\Observer\\DiscordNotifier::__construct<\/a>"],[100,1,"<a href=\"Notification\/Observer\/DiscordNotifier.php.html#19\">App\\Domain\\Notification\\Observer\\DiscordNotifier::notify<\/a>"],[100,1,"<a href=\"Notification\/TaskNotifier.php.html#11\">App\\Domain\\Notification\\TaskNotifier::addObserver<\/a>"],[100,2,"<a href=\"Notification\/TaskNotifier.php.html#16\">App\\Domain\\Notification\\TaskNotifier::notifyObservers<\/a>"],[100,2,"<a href=\"Task\/Entity\/Task.php.html#47\">App\\Domain\\Task\\Entity\\Task::__construct<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#55\">App\\Domain\\Task\\Entity\\Task::getId<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#60\">App\\Domain\\Task\\Entity\\Task::getTitle<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#65\">App\\Domain\\Task\\Entity\\Task::setTitle<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#71\">App\\Domain\\Task\\Entity\\Task::getDescription<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#76\">App\\Domain\\Task\\Entity\\Task::setDescription<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#82\">App\\Domain\\Task\\Entity\\Task::getCreatedAt<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#87\">App\\Domain\\Task\\Entity\\Task::getDueDate<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#92\">App\\Domain\\Task\\Entity\\Task::setDueDate<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#98\">App\\Domain\\Task\\Entity\\Task::getStatus<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#103\">App\\Domain\\Task\\Entity\\Task::setStatus<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#109\">App\\Domain\\Task\\Entity\\Task::getUser<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#114\">App\\Domain\\Task\\Entity\\Task::setUser<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#120\">App\\Domain\\Task\\Entity\\Task::isDone<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#125\">App\\Domain\\Task\\Entity\\Task::getCompletedAt<\/a>"],[100,1,"<a href=\"Task\/Entity\/Task.php.html#130\">App\\Domain\\Task\\Entity\\Task::setCompletedAt<\/a>"],[100,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#12\">App\\Domain\\Task\\Repository\\TaskRepository::__construct<\/a>"],[0,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#17\">App\\Domain\\Task\\Repository\\TaskRepository::findByUser<\/a>"],[100,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#27\">App\\Domain\\Task\\Repository\\TaskRepository::findByStatus<\/a>"],[100,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#37\">App\\Domain\\Task\\Repository\\TaskRepository::save<\/a>"],[100,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#44\">App\\Domain\\Task\\Repository\\TaskRepository::delete<\/a>"],[0,1,"<a href=\"Task\/Repository\/TaskRepository.php.html#51\">App\\Domain\\Task\\Repository\\TaskRepository::findTasksWithUpcomingDeadlines<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#56\">App\\Domain\\User\\Entity\\User::__construct<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#62\">App\\Domain\\User\\Entity\\User::getId<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#67\">App\\Domain\\User\\Entity\\User::getEmail<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#72\">App\\Domain\\User\\Entity\\User::setEmail<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#78\">App\\Domain\\User\\Entity\\User::getUserIdentifier<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#83\">App\\Domain\\User\\Entity\\User::getRoles<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#90\">App\\Domain\\User\\Entity\\User::setRoles<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#96\">App\\Domain\\User\\Entity\\User::getPassword<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#101\">App\\Domain\\User\\Entity\\User::setPassword<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#107\">App\\Domain\\User\\Entity\\User::getPlainPassword<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#112\">App\\Domain\\User\\Entity\\User::setPlainPassword<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#118\">App\\Domain\\User\\Entity\\User::eraseCredentials<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#123\">App\\Domain\\User\\Entity\\User::getFullName<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#128\">App\\Domain\\User\\Entity\\User::setFullName<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#134\">App\\Domain\\User\\Entity\\User::getPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#139\">App\\Domain\\User\\Entity\\User::setPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#145\">App\\Domain\\User\\Entity\\User::getCreatedAt<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#150\">App\\Domain\\User\\Entity\\User::getExp<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#155\">App\\Domain\\User\\Entity\\User::setExp<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#161\">App\\Domain\\User\\Entity\\User::addExp<\/a>"],[100,1,"<a href=\"User\/Entity\/User.php.html#170\">App\\Domain\\User\\Entity\\User::getTasks<\/a>"],[100,2,"<a href=\"User\/Entity\/User.php.html#175\">App\\Domain\\User\\Entity\\User::addTask<\/a>"],[75,3,"<a href=\"User\/Entity\/User.php.html#184\">App\\Domain\\User\\Entity\\User::removeTask<\/a>"],[100,3,"<a href=\"User\/Entity\/User.php.html#194\">App\\Domain\\User\\Entity\\User::getTreeImage<\/a>"],[0,3,"<a href=\"User\/Entity\/User.php.html#208\">App\\Domain\\User\\Entity\\User::getTreeSize<\/a>"],[100,2,"<a href=\"User\/Entity\/User.php.html#223\">App\\Domain\\User\\Entity\\User::__toString<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#30\">App\\Domain\\User\\Entity\\UsernameHistory::getId<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#35\">App\\Domain\\User\\Entity\\UsernameHistory::getUser<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#40\">App\\Domain\\User\\Entity\\UsernameHistory::setUser<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#47\">App\\Domain\\User\\Entity\\UsernameHistory::getOldPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#52\">App\\Domain\\User\\Entity\\UsernameHistory::setOldPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#59\">App\\Domain\\User\\Entity\\UsernameHistory::getNewPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#64\">App\\Domain\\User\\Entity\\UsernameHistory::setNewPseudo<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#71\">App\\Domain\\User\\Entity\\UsernameHistory::getChangedAt<\/a>"],[100,1,"<a href=\"User\/Entity\/UsernameHistory.php.html#76\">App\\Domain\\User\\Entity\\UsernameHistory::setChangedAt<\/a>"],[100,1,"<a href=\"User\/Repository\/UserRepository.php.html#18\">App\\Domain\\User\\Repository\\UserRepository::__construct<\/a>"],[80,2,"<a href=\"User\/Repository\/UserRepository.php.html#23\">App\\Domain\\User\\Repository\\UserRepository::upgradePassword<\/a>"],[100,1,"<a href=\"User\/Repository\/UserRepository.php.html#34\">App\\Domain\\User\\Repository\\UserRepository::findOneByEmail<\/a>"],[100,1,"<a href=\"User\/Repository\/UserRepository.php.html#43\">App\\Domain\\User\\Repository\\UserRepository::findTopUsersByExp<\/a>"],[100,1,"<a href=\"User\/Repository\/UsernameHistoryRepository.php.html#19\">App\\Domain\\User\\Repository\\UsernameHistoryRepository::__construct<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>
