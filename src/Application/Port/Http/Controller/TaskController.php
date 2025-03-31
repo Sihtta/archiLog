@@ -24,7 +24,7 @@ class TaskController extends AbstractController
     public function index(): Response
     {
         if (!$this->getUser()) {
-            return $this->redirectToRoute('security_login');
+            return $this->redirectToRoute('security.login');
         }
 
         $user = $this->getUser();
